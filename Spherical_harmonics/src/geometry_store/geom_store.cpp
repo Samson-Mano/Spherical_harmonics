@@ -321,11 +321,48 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 		}
 
 
+		if (inpt_type == "*EDGES")
+		{
+			// Quad Element
+			while (j < lines.size())
+			{
+				std::istringstream elementIss(lines[j + 1]);
+
+				// Vector to store the split values
+				std::vector<std::string> splitValues;
+
+				// Split the string by comma
+				std::string token;
+				while (std::getline(elementIss, token, ','))
+				{
+					splitValues.push_back(token);
+				}
+
+				if (static_cast<int>(splitValues.size()) != 3)
+				{
+					break;
+				}
+
+				int line_id = std::stoi(splitValues[0]); // Line ID
+				int startnode_id = std::stoi(splitValues[1]); // Start Node id
+				int endnode_id = std::stoi(splitValues[2]); // End Node id
+
+				// Add the Edges
+				this->model_lineelements.add_elementline(line_id, &model_nodes.nodeMap[startnode_id],
+					&model_nodes.nodeMap[endnode_id]);
+				j++;
+			}
+
+
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << "Element edges read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+		}
+
 		// Iterate line
 		j++;
 	}
 
-	
 
 	// Input read failed??
 	if (model_nodes.node_count < 2 || (model_trielements.elementtri_count + model_quadelements.elementquad_count) < 1)
@@ -334,6 +371,7 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 		std::cerr << "Input error !!" << std::endl;
 		return;
 	}
+
 
 	// Geometry is loaded
 	is_geometry_set = true;
@@ -369,6 +407,28 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 	std::cout << "Model read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 }
 
+std::vector<elementline_store> geom_store::removeDuplicates(const std::vector<elementline_store>& elementline)
+{
+	std::vector<elementline_store> uniqueLines;
+	std::set<std::pair<int, int>> seenLines;
+
+	for (const auto& line : elementline) 
+	{
+		// Ensure the start point ID is smaller than the end point ID
+		int smaller = std::min(line.startNode->node_id, line.endNode->node_id);
+		int larger = std::max(line.startNode->node_id, line.endNode->node_id);
+		std::pair<int, int> lineEndpoints = std::make_pair(smaller, larger);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoints) == seenLines.end()) 
+		{
+			uniqueLines.push_back(line);
+			seenLines.insert(lineEndpoints);
+		}
+	}
+
+	return uniqueLines;
+}
 
 void geom_store::update_WindowDimension(const int& window_width, const int& window_height)
 {
@@ -414,6 +474,7 @@ void geom_store::update_model_matrix()
 	model_lineelements.update_geometry_matrices(true, false, false, false, true, false);
 	model_trielements.update_geometry_matrices(true, false, false, false, true, false);
 	model_quadelements.update_geometry_matrices(true, false, false, false, true, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(true, false, false, false, true, false);
 	node_inldispl.update_geometry_matrices(true, false, false, false, true, false);
@@ -450,6 +511,7 @@ void geom_store::update_model_zoomfit()
 	model_lineelements.update_geometry_matrices(false, true, true, true, false, false);
 	model_trielements.update_geometry_matrices(false, true, true, true, false, false);
 	model_quadelements.update_geometry_matrices(false, true, true, true, false, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(false, true, true, true, false, false);
 	node_inldispl.update_geometry_matrices(false, true, true, true, false, false);
@@ -484,6 +546,7 @@ void geom_store::update_model_pan(glm::vec2& transl)
 	model_lineelements.update_geometry_matrices(false, true, false, false, false, false);
 	model_trielements.update_geometry_matrices(false, true, false, false, false, false);
 	model_quadelements.update_geometry_matrices(false, true, false, false, false, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(false, true, false, false, false, false);
 	node_inldispl.update_geometry_matrices(false, true, false, false, false, false);
@@ -515,6 +578,7 @@ void geom_store::update_model_rotate(glm::mat4& rotation_m)
 	model_lineelements.update_geometry_matrices(false, false, true, false, false, false);
 	model_trielements.update_geometry_matrices(false, false, true, false, false, false);
 	model_quadelements.update_geometry_matrices(false, false, true, false, false, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(false, false, true, false, false, false);
 	node_inldispl.update_geometry_matrices(false, false, true, false, false, false);
@@ -547,6 +611,7 @@ void geom_store::update_model_zoom(double& z_scale)
 	model_lineelements.update_geometry_matrices(false, false, false, true, false, false);
 	model_trielements.update_geometry_matrices(false, false, false, true, false, false);
 	model_quadelements.update_geometry_matrices(false, false, false, true, false, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, true, false, false);
 	node_inldispl.update_geometry_matrices(false, false, false, true, false, false);
@@ -586,6 +651,7 @@ void geom_store::update_model_transperency(bool is_transparent)
 	model_lineelements.update_geometry_matrices(false, false, false, false, true, false);
 	model_quadelements.update_geometry_matrices(false, false, false, false, true, false);
 	model_trielements.update_geometry_matrices(false, false, false, false, true, false);
+
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, false, true, false);
 	node_inldispl.update_geometry_matrices(false, false, false, false, true, false);

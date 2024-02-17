@@ -1,24 +1,12 @@
 #pragma once
 #include "point_list_store.h"
 
-struct line_store
-{
-	// store the individual point
-	int line_id = 0;
-
-	glm::vec3 line_startpt_loc = glm::vec3(0);
-	glm::vec3 line_endpt_loc = glm::vec3(0);
-
-	glm::vec3 line_startpt_color = glm::vec3(0);
-	glm::vec3 line_endpt_color = glm::vec3(0);
-
-};
-
 class line_list_store
 {
 public:
 	geom_parameters* geom_param_ptr = nullptr;
 	unsigned int line_count = 0;
+	std::unordered_map<int, int> lineId_Map;
 	std::vector<line_store> lineMap;
 
 	line_list_store();

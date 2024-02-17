@@ -183,6 +183,9 @@
     <ClCompile Include="src\geometry_store\fe_objects\nodes_list_store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\geometry_objects\dcel_mesh_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\dlls\freetype.dll" />
@@ -200,6 +203,8 @@
     <None Include="resources\shaders\text_frag_shader.frag" />
     <None Include="resources\shaders\load_frag_shader.frag" />
     <None Include="resources\shaders\load_vert_shader.vert" />
+    <None Include="resources\shaders\mesh_frag_shader.frag" />
+    <None Include="resources\shaders\mesh_vert_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\fonts\CanadaDBNormal.ttf" />
@@ -388,6 +393,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\fe_objects\nodes_list_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\geometry_objects\dcel_mesh_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

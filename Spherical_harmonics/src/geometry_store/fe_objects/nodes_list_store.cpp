@@ -31,25 +31,20 @@ void nodes_list_store::add_node(int& node_id, glm::vec3& node_pt)
 	node_store temp_node;
 	temp_node.node_id = node_id;
 	temp_node.node_pt = node_pt;
-	temp_node.node_color = geom_param_ptr->geom_colors.node_color;
 
-	// Check whether the node_id is already there
-	if (nodeMap.find(node_id) != nodeMap.end())
-	{
-		// Node ID already exist (do not add)
-		return;
-	}
+	//// Check whether the node_id is already there
+	//if (nodeMap.find(node_id) != nodeMap.end())
+	//{
+	//	// Node ID already exist (do not add)
+	//	return;
+	//}
 
 	// Insert to the nodes
 	nodeMap.insert({ node_id, temp_node });
 	node_count++;
 
 	//__________________________ Add the node points
-	glm::vec3 temp_color = geom_param_ptr->geom_colors.node_color;
-	glm::vec3 node_pt_offset = glm::vec3(0);
-
-	node_points.add_point(node_id, node_pt, temp_color);
-
+	node_points.add_point(node_id, node_pt.x,node_pt.y,node_pt.z);
 
 }
 
@@ -63,7 +58,8 @@ void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node
 
 	for (const auto& it : selected_node_ids)
 	{
-		selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt, temp_color);
+		selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt.x,
+				nodeMap[it].node_pt.y, nodeMap[it].node_pt.z);
 	}
 
 	selected_node_points.set_buffer();

@@ -18,24 +18,29 @@ void point_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	point_shader.create_shader((shadersPath.string() + "/resources/shaders/point_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/point_frag_shader.frag").c_str());
+	point_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
+
+	point_shader.setUniform("ptColor", geom_param_ptr->geom_colors.point_color);
 
 	// Delete all the labels
-	point_count = 0;
-	pointMap.clear();
+	clear_points();
 }
 
-void point_list_store::add_point(int& point_id, glm::vec3& point_loc, glm::vec3& point_color)
+void point_list_store::add_point(const int& point_id, const double& x_coord, const double& y_coord, const double& z_coord)
 {
 	// Create a temporary points
 	point_store temp_pt;
 	temp_pt.point_id = point_id;
-	temp_pt.point_loc = point_loc;
-	temp_pt.point_color = point_color;
+	temp_pt.x_coord = x_coord;
+	temp_pt.y_coord = y_coord;
+	temp_pt.z_coord = z_coord;
 
 	// Add to the list
 	pointMap.push_back(temp_pt);
+
+	// Add to the point id map
+	pointId_Map.insert({ point_id, point_count });
 
 	// Iterate the point count
 	point_count++;
@@ -43,8 +48,8 @@ void point_list_store::add_point(int& point_id, glm::vec3& point_loc, glm::vec3&
 
 void point_list_store::set_buffer()
 {
-	// Define the node vertices of the model for a node (3 position, 3 color ) 
-	const unsigned int point_vertex_count = 6 * point_count;
+	// Define the node vertices of the model for a node (3 position) 
+	const unsigned int point_vertex_count = 3 * point_count;
 	float* point_vertices = new float[point_vertex_count];
 
 	unsigned int point_indices_count = 1 * point_count; // 1 indices to form a point
@@ -62,7 +67,6 @@ void point_list_store::set_buffer()
 
 	VertexBufferLayout node_layout;
 	node_layout.AddFloat(3);  // Node center
-	node_layout.AddFloat(3);  // Node Color
 
 	unsigned int point_vertex_size = point_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -88,6 +92,7 @@ void point_list_store::clear_points()
 {
 	// Delete all the points
 	point_count = 0;
+	pointId_Map.clear();
 	pointMap.clear();
 }
 
@@ -132,8 +137,8 @@ void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pan
 	if (set_deflscale == true)
 	{
 		// set the deflection scale
-		point_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
-		point_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
+		// point_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
+		// point_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
 	}
 }
 
@@ -141,17 +146,12 @@ void point_list_store::get_node_buffer(point_store& pt, float* point_vertices, u
 {
 	// Get the node buffer for the shader
 	// Point location
-	point_vertices[point_v_index + 0] = pt.point_loc.x;
-	point_vertices[point_v_index + 1] = pt.point_loc.y;
-	point_vertices[point_v_index + 2] = pt.point_loc.z;
-
-	// Point color
-	point_vertices[point_v_index + 3] = pt.point_color.x;
-	point_vertices[point_v_index + 4] = pt.point_color.y;
-	point_vertices[point_v_index + 5] = pt.point_color.z;
+	point_vertices[point_v_index + 0] = pt.x_coord;
+	point_vertices[point_v_index + 1] = pt.y_coord;
+	point_vertices[point_v_index + 2] = pt.z_coord;
 
 	// Iterate
-	point_v_index = point_v_index + 6;
+	point_v_index = point_v_index + 3;
 
 	//__________________________________________________________________________
 	// Add the indices

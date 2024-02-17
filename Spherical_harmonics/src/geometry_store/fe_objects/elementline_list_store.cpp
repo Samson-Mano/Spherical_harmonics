@@ -31,35 +31,19 @@ void elementline_list_store::add_elementline(int& line_id, node_store* startNode
 	temp_line.startNode = startNode;
 	temp_line.endNode = endNode;
 
-	// Check whether the line_id is already there
-	if (elementlineMap.find(line_id) != elementlineMap.end())
-	{
-		// Element ID already exist (do not add)
-		return;
-	}
-
-	// Check whether the element already exists
-	for (auto& ln_m : elementlineMap)
-	{
-		elementline_store ln = ln_m.second;
-
-		if ((ln.startNode->node_id == startNode->node_id &&
-			ln.endNode->node_id == endNode->node_id) ||
-			(ln.startNode->node_id == endNode->node_id &&
-				ln.endNode->node_id == startNode->node_id))
-		{
-			// Element already exists
-			return;
-		}
-	}
-
-
+	//// Check whether the line_id is already there
+	//if (elementlineMap.find(line_id) != elementlineMap.end())
+	//{
+	//	// Element ID already exist (do not add)
+	//	return;
+	//}
+	
 	// Insert to the lines
 	elementlineMap.insert({ line_id, temp_line });
 	elementline_count++;
 
 	//__________________________ Add the node points
-	glm::vec3 temp_color = geom_param_ptr->geom_colors.line_color;
+	glm::vec3 temp_color = geom_param_ptr->geom_colors.edge_color;
 	glm::vec3 start_node_pt = (*startNode).node_pt;
 	glm::vec3 end_node_pt = (*endNode).node_pt;
 

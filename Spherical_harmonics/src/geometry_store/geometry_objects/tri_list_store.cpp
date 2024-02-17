@@ -18,16 +18,16 @@ void tri_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/point_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/point_frag_shader.frag").c_str());
+	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
+
+	tri_shader.setUniform("ptColor", geom_param_ptr->geom_colors.triangle_color);
 
 	// Delete all the triangles
-	tri_count = 0;
-	triMap.clear();
+	clear_triangles();
 }
 
-void tri_list_store::add_tri(int& tri_id, const glm::vec3& tript1_loc, const glm::vec3& tript2_loc, const glm::vec3& tript3_loc, 
-	glm::vec3& tript1_color, glm::vec3& tript2_color, glm::vec3& tript3_color)
+void tri_list_store::add_tri(int& tri_id, const int& pt1_id, const int& pt2_id, const int& pt3_id)
 {
 	// Create a temporary points
 	tri_store temp_tri;
@@ -67,7 +67,7 @@ void tri_list_store::set_buffer()
 	for (auto& tri : triMap)
 	{
 		// Add triangle buffers
-		get_line_buffer(tri, tri_vertices, tri_v_index, tri_vertex_indices, tri_i_index);
+		get_tri_buffer(tri, tri_vertices, tri_v_index, tri_vertex_indices, tri_i_index);
 	}
 
 	VertexBufferLayout tri_pt_layout;
@@ -99,6 +99,7 @@ void tri_list_store::clear_triangles()
 	// Delete all the triangles
 	tri_count = 0;
 	triMap.clear();
+	triId_Map.clear();
 }
 
 void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation, 
@@ -142,12 +143,12 @@ void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	if (set_deflscale == true)
 	{
 		// set the deflection scale
-		tri_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
-		tri_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
+		// tri_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
+		// tri_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
 	}
 }
 
-void tri_list_store::get_line_buffer(tri_store& tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
+void tri_list_store::get_tri_buffer(tri_store& tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
 {
 	// Get the three node buffer for the shader
 	// Point 1

@@ -3,7 +3,10 @@
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <unordered_set>
 #include <sstream>
+#include <vector>
+#include <set>
 #include "geometry_buffers/font_atlas.h"
 
 // Stopwatch
@@ -12,12 +15,12 @@
 struct geom_color_theme
 {
 	glm::vec3 background_color = glm::vec3(0);
-	glm::vec3 node_color = glm::vec3(0);
-	glm::vec3 selection_color = glm::vec3(0);
-	glm::vec3 line_color = glm::vec3(0);
-	glm::vec3 line_length_color = glm::vec3(0);
-	glm::vec3 load_color = glm::vec3(0);
+	glm::vec3 point_color = glm::vec3(0);
+	glm::vec3 edge_color = glm::vec3(0);
 	glm::vec3 triangle_color = glm::vec3(0);
+
+	glm::vec3 selection_color = glm::vec3(0);
+	glm::vec3 load_color = glm::vec3(0);
 	glm::vec3 constraint_color = glm::vec3(0);
 	glm::vec3 ptmass_color = glm::vec3(0);
 	glm::vec3 inlcond_displ_color = glm::vec3(0);

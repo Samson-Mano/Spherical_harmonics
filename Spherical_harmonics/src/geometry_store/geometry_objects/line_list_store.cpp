@@ -18,16 +18,16 @@ void line_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	line_shader.create_shader((shadersPath.string() + "/resources/shaders/point_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/point_frag_shader.frag").c_str());
+	line_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
+
+	line_shader.setUniform("ptColor", geom_param_ptr->geom_colors.edge_color);
 
 	// Delete all the labels
-	line_count = 0;
-	lineMap.clear();
+	clear_lines();
 }
 
-void line_list_store::add_line(int& line_id, glm::vec3& line_startpt_loc, glm::vec3& line_endpt_loc,
-											glm::vec3& line_startpt_color, glm::vec3& line_endpt_color)
+void line_list_store::add_line(const int& line_id, const int& startPt_id, const int& endPt_id)
 {
 	// Create a temporary points
 	line_store temp_ln;
@@ -99,6 +99,7 @@ void line_list_store::clear_lines()
 	// Delete all the lines
 	line_count = 0;
 	lineMap.clear();
+	lineId_Map.clear();
 }
 
 void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
