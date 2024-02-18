@@ -334,8 +334,11 @@ void modal_analysis_solver::modal_analysis_model_circular(const nodes_list_store
 
 	for (auto& nd_m : model_nodes.nodeMap)
 	{
-		node_id = nd_m.first;
-		glm::vec3 node_pt = nd_m.second.node_pt;
+		node_store nd = nd_m.second;
+
+		node_id = nd.node_id;
+		glm::vec3 node_pt = nd.node_pt();
+
 		double nd_radius = glm::length(node_pt);
 
 		if (nd_radius >= (c_radius- 0.1) )
@@ -365,10 +368,10 @@ void modal_analysis_solver::modal_analysis_model_circular(const nodes_list_store
 		// Get the mid point of the quad
 		std::vector<glm::vec3> quad_corner_pts;
 
-		quad_corner_pts.push_back(quad.nd1->node_pt); // quad point 1
-		quad_corner_pts.push_back(quad.nd2->node_pt); // quad point 2
-		quad_corner_pts.push_back(quad.nd3->node_pt); // quad point 3
-		quad_corner_pts.push_back(quad.nd4->node_pt); // quad point 4
+		quad_corner_pts.push_back(quad.nd1->node_pt()); // quad point 1
+		quad_corner_pts.push_back(quad.nd2->node_pt()); // quad point 2
+		quad_corner_pts.push_back(quad.nd3->node_pt()); // quad point 3
+		quad_corner_pts.push_back(quad.nd4->node_pt()); // quad point 4
 
 		// Quad mid point
 		glm::vec3 quad_midpt = geom_parameters::findGeometricCenter(quad_corner_pts);
@@ -421,7 +424,7 @@ void modal_analysis_solver::modal_analysis_model_circular(const nodes_list_store
 			if (constrained_node_map[node_id] == false)
 			{
 				// Node is not constrained, so get the co-ordinate
-				glm::vec3 node_pt = nd_m.second.node_pt;
+				glm::vec3 node_pt = nd_m.second.node_pt();
 
 				int matrix_index = nodeid_map[node_id];
 
@@ -479,7 +482,7 @@ void modal_analysis_solver::modal_analysis_model_circular(const nodes_list_store
 	for (auto& nd_m : model_nodes.nodeMap)
 	{
 		int node_id = nd_m.first;
-		glm::vec3 node_pt = nd_m.second.node_pt;
+		glm::vec3 node_pt = nd_m.second.node_pt();
 
 		// Modal analysis results
 		std::vector<glm::vec3> node_modal_displ;
@@ -674,7 +677,7 @@ void modal_analysis_solver::modal_analysis_model_rectangular(const nodes_list_st
 	for (auto& nd_m : model_nodes.nodeMap)
 	{
 		node_id = nd_m.first;
-		glm::vec3 node_pt = nd_m.second.node_pt;
+		glm::vec3 node_pt = nd_m.second.node_pt();
 		
 		if (node_pt.x <= 0.1 || node_pt.y <= 0.1 || node_pt.x >= (length_x -0.1) || node_pt.y >= (length_y - 0.1))
 		{
@@ -703,10 +706,10 @@ void modal_analysis_solver::modal_analysis_model_rectangular(const nodes_list_st
 		// Get the mid point of the quad
 		std::vector<glm::vec3> quad_corner_pts;
 
-		quad_corner_pts.push_back(quad.nd1->node_pt); // quad point 1
-		quad_corner_pts.push_back(quad.nd2->node_pt); // quad point 2
-		quad_corner_pts.push_back(quad.nd3->node_pt); // quad point 3
-		quad_corner_pts.push_back(quad.nd4->node_pt); // quad point 4
+		quad_corner_pts.push_back(quad.nd1->node_pt()); // quad point 1
+		quad_corner_pts.push_back(quad.nd2->node_pt()); // quad point 2
+		quad_corner_pts.push_back(quad.nd3->node_pt()); // quad point 3
+		quad_corner_pts.push_back(quad.nd4->node_pt()); // quad point 4
 
 		// Quad mid point
 		glm::vec3 quad_midpt = geom_parameters::findGeometricCenter(quad_corner_pts);
@@ -755,7 +758,7 @@ void modal_analysis_solver::modal_analysis_model_rectangular(const nodes_list_st
 			if (this->constrained_node_map[node_id] == false)
 			{
 				// Node is not constrained, so get the co-ordinate
-				glm::vec3 node_pt = nd_m.second.node_pt;
+				glm::vec3 node_pt = nd_m.second.node_pt();
 
 				int matrix_index = nodeid_map[node_id];
 
@@ -802,7 +805,7 @@ void modal_analysis_solver::modal_analysis_model_rectangular(const nodes_list_st
 	for (auto& nd_m : model_nodes.nodeMap)
 	{
 		int node_id = nd_m.first;
-		glm::vec3 node_pt = nd_m.second.node_pt;
+		glm::vec3 node_pt = nd_m.second.node_pt();
 		// Modal analysis results
 		std::vector<glm::vec3> node_modal_displ;
 		std::vector<double> node_modal_displ_magnitude;

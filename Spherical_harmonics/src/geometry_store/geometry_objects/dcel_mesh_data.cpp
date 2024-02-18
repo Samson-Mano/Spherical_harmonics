@@ -2,495 +2,378 @@
 
 dcel_mesh_data::dcel_mesh_data()
 {
-    // Empty constructor
+	// Empty constructor
 }
 
 dcel_mesh_data::~dcel_mesh_data()
 {
-    // Empty destructor
+	// Empty destructor
 }
 
 void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 {
-	// Set the geometry parameters
-	this->geom_param_ptr = geom_param_ptr;
-
-	// Create the point shader
-	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
-
-	// Create the point shader
-	point_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
-
-	point_shader.setUniform("ptColor", geom_param_ptr->geom_colors.point_color);
-	
-	// Create the edge shader
-	edge_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
-
-	edge_shader.setUniform("ptColor", geom_param_ptr->geom_colors.edge_color);
-
-	// Create the triangle shader
-	tria_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
-
-	tria_shader.setUniform("ptColor", geom_param_ptr->geom_colors.triangle_color);
-
-	// Delete all the mesh (points, lines and triangles)
-	clear_mesh();
-
+	// Initialize the geometry objects of the mesh
+	node_points.init(geom_param_ptr);
+	selected_node_points.init(geom_param_ptr);
+	mesh_half_edges.init(geom_param_ptr);
+	mesh_boundaries.init(geom_param_ptr);
+	element_tris.init(geom_param_ptr);
+	element_quads123.init(geom_param_ptr);
+	element_quads341.init(geom_param_ptr);
 }
 
-void dcel_mesh_data::add_points(const int& point_id, const double& x_coord, const double& y_coord, const double& z_coord)
+void dcel_mesh_data::add_mesh_point(const int& point_id, const double& x_coord, const double& y_coord, const double& z_coord)
 {
-	// Add the points
-	vertex_store temp_vertex;
-	temp_vertex.vertex_id = point_id;
-	temp_vertex.x = x_coord;
-	temp_vertex.y = y_coord;
-	temp_vertex.z = z_coord;
-
-	// Add to the ID list
-	pointId_Map.insert({ point_id , point_count });
-
-	// Add to the list
-	pointMap.push_back(temp_vertex);
-
-	// Iterate
-	point_count++;
+	// Add the node points
+	node_points.add_point(point_id, x_coord, y_coord, z_coord);
 }
 
-int dcel_mesh_data::add_edges(const int& startPt_id, const int& endPt_id)
+void dcel_mesh_data::add_selected_points(const std::vector<int>& selected_points)
 {
-	// Add the edges
-	edge_store* temp_edge = new edge_store;
-	temp_edge->edge_id = half_edge_count;
-	temp_edge->origin = &pointMap[pointId_Map[startPt_id]];
-	temp_edge->destination = &pointMap[pointId_Map[endPt_id]];
-	
-	// Add to the list
-	HalfedgeMap.push_back(temp_edge);
 
-	// Iterate
-	half_edge_count++;
-
-	return (half_edge_count - 1); // return the index of last addition
-
-	delete temp_edge;
 }
 
-void dcel_mesh_data::add_triangles(const int& tri_id, const int& point_id1, const int& point_id2, const int& point_id3)
+void dcel_mesh_data::add_mesh_triangle(const int& tri_id, const int& point_id1, const int& point_id2, const int& point_id3)
 {
-	// Create three edges
-	int edge1_index = add_edges(point_id1, point_id2); // edge 1 index
-	int edge2_index = add_edges(point_id2, point_id3); // edge 2 index
-	int edge3_index = add_edges(point_id3, point_id1); // edge 3 index
+	//    2____3 
+	//    |   /  
+	//    | /    
+	//    1      
 
-	// Add the triangle
-	triangle_store temp_tri;
-	temp_tri.tri_id = tri_id;
-	temp_tri.edge1 = HalfedgeMap[edge1_index];
-	temp_tri.edge2 = HalfedgeMap[edge2_index];
-	temp_tri.edge3 = HalfedgeMap[edge3_index];
-
-	// Add to the triangle list
-	triMap.push_back(temp_tri);
-
-	// Iterate
-	tria_count++;
-
-	// Update the Half edge pointers
-	// next Halfedge
-	HalfedgeMap[edge1_index]->next = HalfedgeMap[edge2_index]; // next of edge 1 is edge 2
-	HalfedgeMap[edge2_index]->next = HalfedgeMap[edge3_index]; // next of edge 2 is edge 3
-	HalfedgeMap[edge3_index]->next = HalfedgeMap[edge1_index]; // next of edge 3 is edge 1
-
-	// Update the triangle face pointer
-	HalfedgeMap[edge1_index]->face = &triMap[tria_count - 1];
-	HalfedgeMap[edge2_index]->face = &triMap[tria_count - 1];
-	HalfedgeMap[edge3_index]->face = &triMap[tria_count - 1];
+	add_triangle(tri_id, point_id1, point_id2, point_id3, element_tris);
 
 }
+
+void dcel_mesh_data::add_mesh_quadrilateral(const int& quad_id,	const int& point_id1,	const int& point_id2,	const int& point_id3,	const int& point_id4)
+{
+	//   2______3     2____3      3
+	//   |      |     |   /     / |
+	//   |      |     | /     /   | 
+	//   1______4     1      1____4    
+
+	// Add half triangle 1
+	add_triangle(quad_id, point_id1, point_id2, point_id3, element_quads123);
+
+	// Add hald triangle 2
+	add_triangle(quad_id, point_id3, point_id4, point_id1, element_quads341);
+
+}
+
+
+void dcel_mesh_data::add_triangle(const int& tri_id, const int& point_id1,	const int& point_id2, const int& point_id3,
+	tri_list_store& triangle)
+{
+	// Add the half triangle of the quadrilaterals
+	// Add three half edges
+	int line_id1, line_id2, line_id3;
+
+	// Add edge 1
+	line_id1 = mesh_half_edges.line_count;
+	mesh_half_edges.add_line(line_id1,
+		node_points.get_point(point_id1),
+		node_points.get_point(point_id2));
+
+	// Add edge 2
+	line_id2 = mesh_half_edges.line_count;
+	mesh_half_edges.add_line(line_id2,
+		node_points.get_point(point_id2),
+		node_points.get_point(point_id3));
+
+	// Add edge 3
+	line_id3 = mesh_half_edges.line_count;
+	mesh_half_edges.add_line(line_id3,
+		node_points.get_point(point_id3),
+		node_points.get_point(point_id1));
+
+	//________________________________________
+	// Add the mesh triangles
+	line_store*  edge_1 = mesh_half_edges.get_line(line_id1);
+	line_store*  edge_2 = mesh_half_edges.get_line(line_id2);
+	line_store*  edge_3 = mesh_half_edges.get_line(line_id3);
+
+	triangle.add_tri(tri_id, mesh_half_edges.get_line(line_id1),
+		mesh_half_edges.get_line(line_id2), 
+		mesh_half_edges.get_line(line_id3));
+
+
+	//// Update the Half edge pointers
+	//// Update the Halfedge's next Halfedge pointer
+	//edge_1->next_line = edge_2;
+	//edge_2->next_line = edge_3;
+	//edge_3->next_line = edge_1;
+
+	//// Update the Halfedge's triangle face pointer
+	//tri_store* tri = triangle.get_triangle(tri_id);
+
+	//edge_1->face = tri;
+	//edge_2->face = tri;
+	//edge_3->face = tri;
+}
+
+
+void dcel_mesh_data::set_mesh_wireframe()
+{
+	// std::vector<elementline_store> uniqueLines;
+	mesh_boundaries.clear_lines();
+
+	std::set<std::pair<int, int>> seenLines;
+	std::pair<int, int> lineEndpoint_ids;
+	int smaller_id = 0;
+	int larger_id = 0;
+	int line_id = 0;
+
+	// Triangles
+	for (const auto& tri : element_tris.triMap)
+	{
+		// Edge 1
+		line_store* edge1 = tri.edge1;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		larger_id = std::max(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 2
+		line_store* edge2 = tri.edge2;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		larger_id = std::max(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 3
+		line_store* edge3 = tri.edge3;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge3->start_pt->point_id, edge3->end_pt->point_id);
+		larger_id = std::max(edge3->start_pt->point_id, edge3->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+		
+	}
+
+	// Quadrilaterals
+	for (const auto& tri : element_quads123.triMap)
+	{
+		// Edge 1
+		line_store* edge1 = tri.edge1;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		larger_id = std::max(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 2
+		line_store* edge2 = tri.edge2;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		larger_id = std::max(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 3
+		// Do Not Add - because its quadrialterals diagonals
+	}
+
+
+	for (const auto& tri : element_quads341.triMap)
+	{
+		// Edge 1
+		line_store* edge1 = tri.edge1;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		larger_id = std::max(edge1->start_pt->point_id, edge1->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 2
+		line_store* edge2 = tri.edge2;
+
+		// Ensure the start point ID is smaller than the end point ID
+		smaller_id = std::min(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		larger_id = std::max(edge2->start_pt->point_id, edge2->end_pt->point_id);
+		lineEndpoint_ids = std::make_pair(smaller_id, larger_id);
+
+		// If the line is not already seen in the opposite direction, add it to the unique lines
+		if (seenLines.find(lineEndpoint_ids) == seenLines.end())
+		{
+			// Create the mesh boundary
+			mesh_boundaries.add_line(line_id,
+				node_points.get_point(smaller_id),
+				node_points.get_point(larger_id));
+
+			line_id++;
+
+			// Add to the seen lines
+			seenLines.insert(lineEndpoint_ids);
+		}
+
+
+		// Edge 3
+		// Do Not Add - because its quadrialterals diagonals
+	}
+
+}
+
 
 void dcel_mesh_data::clear_mesh()
 {
-	// Clear the mesh data
-	point_count = 0;
-	half_edge_count = 0;
-	edge_count = 0;
-	tria_count = 0;
+	// Clear the mesh
+	node_points.clear_points();
+	selected_node_points.clear_points();
+	mesh_half_edges.clear_lines();
+	mesh_boundaries.clear_lines();
+	element_tris.clear_triangles();
+	element_quads123.clear_triangles(); 
+	element_quads341.clear_triangles(); 
 
-	pointId_Map.clear(); // clear the point Id and vector index
-	pointMap.clear(); // Clear all the points
-	triMap.clear(); // Clear all the triangles
-	HalfedgeMap.clear(); // Clear all the Half edges
-	edgeMap.clear(); // Clear all the edges
 }
 
 void dcel_mesh_data::set_buffer()
 {
-	// Point buffer
-	set_point_buffer();
-
-	// Edge buffer
-	set_edge_buffer();
-
-	// Triangle buffer
-	set_triangle_buffer();
-}
-
-void dcel_mesh_data::set_point_buffer()
-{
-	// Define the node vertices of the model for a node (3 position, 3 color ) 
-	const unsigned int point_vertex_count = 3 * point_count;
-	float* point_vertices = new float[point_vertex_count];
-
-	unsigned int point_indices_count = 1 * point_count; // 1 indices to form a point
-	unsigned int* point_vertex_indices = new unsigned int[point_indices_count];
-
-	unsigned int point_v_index = 0;
-	unsigned int point_i_index = 0;
-
-	// Set the node vertices
-	for (auto& pt : pointMap)
-	{
-		// Add points buffers
-		get_point_buffer(pt, point_vertices, point_v_index, point_vertex_indices, point_i_index);
-	}
-
-	VertexBufferLayout node_layout;
-	node_layout.AddFloat(3);  // Node center
-	
-
-	unsigned int point_vertex_size = point_vertex_count * sizeof(float); // Size of the node_vertex
-
-	// Create the Node Deflection buffers
-	point_buffer.CreateBuffers(point_vertices, point_vertex_size, point_vertex_indices, point_indices_count, node_layout);
-
-	// Delete the dynamic array
-	delete[] point_vertices;
-	delete[] point_vertex_indices;
+	// Set the buffer
+	node_points.set_buffer();
+	mesh_boundaries.set_buffer();
+	element_tris.set_buffer();
+	element_quads123.set_buffer(); 
+	element_quads341.set_buffer(); 
 
 }
-
-void dcel_mesh_data::set_edge_buffer()
-{
-	// Create the unique edges
-	edgeMap.clear();
-	edgeMap = getUniqueEdges(triMap);
-
-	edge_count = static_cast<int> (edgeMap.size());
-
-	//_________________________________________________________________________
-
-	// Define the node vertices of the model for a node (3 position) 
-	const unsigned int line_vertex_count = 3 * 2 * edge_count;
-	float* line_vertices = new float[line_vertex_count];
-
-	unsigned int line_indices_count = 2 * edge_count; // 1 indices to form a point
-	unsigned int* line_vertex_indices = new unsigned int[line_indices_count];
-
-	unsigned int line_v_index = 0;
-	unsigned int line_i_index = 0;
-
-	// Set the node vertices
-	for (auto& ln : edgeMap)
-	{
-		// Add  points buffers
-		get_edge_buffer(ln, line_vertices, line_v_index, line_vertex_indices, line_i_index);
-	}
-
-	VertexBufferLayout line_pt_layout;
-	line_pt_layout.AddFloat(3);  // Node center
-
-	unsigned int line_vertex_size = line_vertex_count * sizeof(float); // Size of the node_vertex
-
-	// Create the Node Deflection buffers
-	edge_buffer.CreateBuffers(line_vertices, line_vertex_size, line_vertex_indices, line_indices_count, line_pt_layout);
-
-	// Delete the dynamic array
-	delete[] line_vertices;
-	delete[] line_vertex_indices;
-
-}
-
-void dcel_mesh_data::set_triangle_buffer()
-{
-	// Define the tri vertices of the model for a node (3 position, 3 color) 
-	const unsigned int tri_vertex_count = 3 * 3 * tria_count;
-	float* tri_vertices = new float[tri_vertex_count];
-
-	unsigned int tri_indices_count = 3 * tria_count; // 3 indices to form a triangle
-	unsigned int* tri_vertex_indices = new unsigned int[tri_indices_count];
-
-	unsigned int tri_v_index = 0;
-	unsigned int tri_i_index = 0;
-
-	// Set the tri vertices
-	for (auto& tri : triMap)
-	{
-		// Add triangle buffers
-		get_tria_buffer(tri, tri_vertices, tri_v_index, tri_vertex_indices, tri_i_index);
-	}
-
-	VertexBufferLayout tri_pt_layout;
-	tri_pt_layout.AddFloat(3);  // Node center
-
-	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the node_vertex
-
-	// Create the triangle buffers
-	tria_buffer.CreateBuffers(tri_vertices, tri_vertex_size, tri_vertex_indices, tri_indices_count, tri_pt_layout);
-
-	// Delete the dynamic array
-	delete[] tri_vertices;
-	delete[] tri_vertex_indices;
-
-}
-
 
 void dcel_mesh_data::paint_points()
 {
-	// Paint all the points
-	point_shader.Bind();
-	point_buffer.Bind();
-	glDrawElements(GL_POINTS, (1 * point_count), GL_UNSIGNED_INT, 0);
-	point_buffer.UnBind();
-	point_shader.UnBind();
-}
+	// Paint the nodal points
+	node_points.paint_points();
 
+}
 
 void dcel_mesh_data::paint_selected_points()
 {
-	// Paint the selected points
+	// Paint the selected nodal points
+	selected_node_points.paint_points();
 
 }
 
-
-void dcel_mesh_data::paint_edges()
+void dcel_mesh_data::paint_mesh_edges()
 {
-	// Paint all the edges
-	edge_shader.Bind();
-	edge_buffer.Bind();
-	glDrawElements(GL_LINES, (2 * edge_count), GL_UNSIGNED_INT, 0);
-	edge_buffer.UnBind();
-	edge_shader.UnBind();
-}
+	// Paint the mesh boundaries
+	mesh_boundaries.paint_lines();
 
+}
 
 void dcel_mesh_data::paint_triangles()
 {
-	// Paint all the triangles
-	tria_shader.Bind();
-	tria_buffer.Bind();
-	glDrawElements(GL_TRIANGLES, (3 * tria_count), GL_UNSIGNED_INT, 0);
-	tria_buffer.UnBind();
-	tria_shader.UnBind();
-}
-
-
-void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, 
-	bool set_rotatetranslation, bool set_zoomtranslation, bool set_transparency)
-{
-	if (set_modelmatrix == true)
-	{
-		// set the model matrix
-		point_shader.setUniform("transparency", 0.8f);
-
-		point_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		point_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
-		point_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
-
-		edge_shader.setUniform("transparency", 0.8f);
-
-		edge_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		edge_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
-		edge_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
-
-		tria_shader.setUniform("transparency", 0.8f);
-
-		tria_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		tria_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
-		tria_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
-	}
-
-	if (set_pantranslation == true)
-	{
-		// set the pan translation
-		point_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-		edge_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-		tria_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-	}
-
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		point_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-		edge_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-		tria_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		point_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-		edge_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-		tria_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
-
-	if (set_transparency == true)
-	{
-		// set the alpha transparency
-		point_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
-		edge_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
-		tria_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
-	}
-
+	// Paint the triangles
+	element_tris.paint_triangles();
 
 }
 
-void dcel_mesh_data::get_point_buffer(const vertex_store& pt, float* point_vertices, unsigned int& point_v_index, 
-	unsigned int* point_vertex_indices, unsigned int& point_i_index)
+void dcel_mesh_data::paint_quadrilaterals()
 {
-	// Get the node buffer for the shader
-	// Point location
-	point_vertices[point_v_index + 0] = pt.x;
-	point_vertices[point_v_index + 1] = pt.y;
-	point_vertices[point_v_index + 2] = pt.z;
-
-	// Iterate
-	point_v_index = point_v_index + 3;
-
-	//__________________________________________________________________________
-	// Add the indices
-	point_vertex_indices[point_i_index] = point_i_index;
-
-	point_i_index = point_i_index + 1;
-}
-
-void dcel_mesh_data::get_edge_buffer(const edge_store* ln, float* edge_vertices, unsigned int& edge_v_index, 
-	unsigned int* edge_vertex_indices, unsigned int& edge_i_index)
-{
-	// Get the node buffer for the shader
-	// Start Point
-	// Point location
-	edge_vertices[edge_v_index + 0] = ln->origin->x;
-	edge_vertices[edge_v_index + 1] = ln->origin->y;
-	edge_vertices[edge_v_index + 2] = ln->origin->z;
-
-	// Iterate
-	edge_v_index = edge_v_index + 3;
-
-	// End Point
-	// Point location
-	edge_vertices[edge_v_index + 0] = ln->destination->x;
-	edge_vertices[edge_v_index + 1] = ln->destination->y;
-	edge_vertices[edge_v_index + 2] = ln->destination->z;
-
-	// Iterate
-	edge_v_index = edge_v_index + 3;
-
-	//__________________________________________________________________________
-	// Add the indices
-	// Index 1
-	edge_vertex_indices[edge_i_index] = edge_i_index;
-
-	edge_i_index = edge_i_index + 1;
-
-	// Index 2
-	edge_vertex_indices[edge_i_index] = edge_i_index;
-
-	edge_i_index = edge_i_index + 1;
+	// Paint the quadrilaterals
+	element_quads123.paint_triangles(); // Triangle with edge 123
+	element_quads341.paint_triangles(); // Triangle with edge 341
 
 }
 
-void dcel_mesh_data::get_tria_buffer(const triangle_store& tri, float* tri_vertices, unsigned int& tri_v_index, 
-	unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
+
+void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
+	bool set_zoomtranslation, bool set_transparency)
 {
-	// Get the three node buffer for the shader
-	// Point 1
-	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge1->origin->x;
-	tri_vertices[tri_v_index + 1] = tri.edge1->origin->y;
-	tri_vertices[tri_v_index + 2] = tri.edge1->origin->z;
+	// Update the openGL uniform values of geometry
+	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	element_quads123.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	element_quads341.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 
-	// Iterate
-	tri_v_index = tri_v_index + 3;
-
-	// Point 2
-	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge2->origin->x;
-	tri_vertices[tri_v_index + 1] = tri.edge2->origin->y;
-	tri_vertices[tri_v_index + 2] = tri.edge2->origin->z;
-
-	// Iterate
-	tri_v_index = tri_v_index + 3;
-
-	// Point 3
-	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge3->origin->x;
-	tri_vertices[tri_v_index + 1] = tri.edge3->origin->y;
-	tri_vertices[tri_v_index + 2] = tri.edge3->origin->z;
-
-	// Iterate
-	tri_v_index = tri_v_index + 3;
-
-	//__________________________________________________________________________
-	// Add the indices
-	// Index 1
-	tri_vertex_indices[tri_i_index] = tri_i_index;
-
-	tri_i_index = tri_i_index + 1;
-
-	// Index 2
-	tri_vertex_indices[tri_i_index] = tri_i_index;
-
-	tri_i_index = tri_i_index + 1;
-
-	// Index 3
-	tri_vertex_indices[tri_i_index] = tri_i_index;
-
-	tri_i_index = tri_i_index + 1;
-}
-
-std::vector<edge_store*> dcel_mesh_data::getUniqueEdges(const std::vector<triangle_store>& triangles)
-{
-	std::vector<edge_store*> uniqueEdges;
-
-	// Iterate over all triangles
-	for (const auto& triangle : triangles) 
-	{
-		// Add each edge of the triangle to the set of unique edges
-		addUniqueEdgeToSet(&uniqueEdges, triangle.edge1);
-		addUniqueEdgeToSet(&uniqueEdges, triangle.edge2);
-		addUniqueEdgeToSet(&uniqueEdges, triangle.edge3);
-	}
-
-	return uniqueEdges;
-}
-
-void dcel_mesh_data::addUniqueEdgeToSet(std::vector<edge_store*>* uniqueEdges, edge_store* edge)
-{
-	if (edge == nullptr)
-		return;
-
-	// Check if the edge already exists in the vector
-	for (edge_store* e : *uniqueEdges)
-	{
-		if (e->origin == edge->origin && e->destination == edge->destination)
-		{
-			// Edge already exists, return
-			return;
-		}
-	}
-
-	// If the edge is unique, add it to the vector of unique edges
-	uniqueEdges->push_back(edge);
-}
-
-void dcel_mesh_data::updateTwinEdges(std::vector<triangle_store>& triangles)
-{
-}
-
-void dcel_mesh_data::checkAndUpdateTwin(std::unordered_map<std::pair<vertex_store*, vertex_store*>, edge_store*>* edgeMap, edge_store* edge)
-{
 }

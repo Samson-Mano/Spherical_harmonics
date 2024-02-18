@@ -740,7 +740,7 @@ void pulse_analysis_solver::map_pulse_analysis_results(pulse_node_list_store& pu
 		node_store nd = nd_m.second;
 
 		// Add to the pulse node results store
-		pulse_result_nodes.add_result_node(nd.node_id, nd.node_pt, node_results.at(nd.node_id), number_of_time_steps);
+		pulse_result_nodes.add_result_node(nd.node_id, nd.node_pt(), node_results.at(nd.node_id), number_of_time_steps);
 	}
 
 	//_________________________________________________________________________________________________________________

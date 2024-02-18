@@ -46,6 +46,28 @@ void point_list_store::add_point(const int& point_id, const double& x_coord, con
 	point_count++;
 }
 
+point_store* point_list_store::get_point(const int& point_id)
+{
+	// Check whether point_id exists?
+	auto it = pointId_Map.find(point_id);
+	point_store* pt = nullptr;
+
+	if (it != pointId_Map.end())
+	{
+		// Point id exists
+		pt = &pointMap[it->second];
+	}
+	else
+	{
+		// id not found
+		return nullptr;
+	}
+
+	// return the address of the point
+	return pt;
+}
+
+
 void point_list_store::set_buffer()
 {
 	// Define the node vertices of the model for a node (3 position) 
@@ -97,7 +119,7 @@ void point_list_store::clear_points()
 }
 
 void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
+	bool set_zoomtranslation, bool set_transparency)
 {
 	if (set_modelmatrix == true)
 	{
@@ -132,13 +154,6 @@ void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pan
 	{
 		// set the alpha transparency
 		point_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
-	}
-
-	if (set_deflscale == true)
-	{
-		// set the deflection scale
-		// point_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
-		// point_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
 	}
 }
 

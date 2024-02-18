@@ -1,6 +1,20 @@
 #pragma once
 #include "point_list_store.h"
 
+struct line_store
+{
+	// store the individual point
+	int line_id = -1;
+
+	point_store* start_pt = nullptr;
+	point_store* end_pt = nullptr;
+	line_store* next_line = nullptr;        // Next half-edge in the same face
+	line_store* twin_line = nullptr;        // Opposite half-edge
+	tri_store* face = nullptr;    // Face to the left of this half-edge
+};
+
+
+
 class line_list_store
 {
 public:
@@ -12,13 +26,14 @@ public:
 	line_list_store();
 	~line_list_store();
 	void init(geom_parameters* geom_param_ptr);
-	void add_line(int& line_id, glm::vec3& line_startpt_loc,glm::vec3& line_endpt_loc,
-								glm::vec3& line_startpt_color, glm::vec3& line_endpt_color);
+	void add_line(const int& line_id, point_store* start_pt, point_store* end_pt);
+	line_store* get_line(const int& line_id);
+
 	void set_buffer();
 	void paint_lines();
 	void clear_lines();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
+		bool set_zoomtranslation, bool set_transparency);
 private:
 	gBuffers line_buffer;
 	Shader line_shader;

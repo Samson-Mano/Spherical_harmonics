@@ -141,17 +141,17 @@ void nodeinlcond_list_store::set_buffer()
 		glm::vec3 inlcond_pt_end = glm::vec3(inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z + pt_amplitude);
 
 		// Add the end point
-		inlcond_points.add_point(pt_id, inlcond_pt_start, temp_color);
+		inlcond_points.add_point(pt_id, inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z);
 
 		pt_id++;
 
 		// Add the end point
-		inlcond_points.add_point(pt_id, inlcond_pt_end, temp_color);
+		inlcond_points.add_point(pt_id, inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z + pt_amplitude);
 
 		pt_id++;
 
 		// Add the initial condition line
-		inlcond_lines.add_line(ln_id, inlcond_pt_start, inlcond_pt_end, temp_color, temp_color);
+		inlcond_lines.add_line(ln_id, inlcond_points.get_point(pt_id-2), inlcond_points.get_point(pt_id - 1));
 
 		ln_id++;
 	}
@@ -180,7 +180,7 @@ void nodeinlcond_list_store::update_geometry_matrices(bool set_modelmatrix, bool
 	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
 {
 	// Update model openGL uniforms
-	inlcond_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-	inlcond_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
+	inlcond_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	inlcond_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	
 }

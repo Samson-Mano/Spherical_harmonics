@@ -10,14 +10,15 @@ nodes_list_store::~nodes_list_store()
 	// Empty destructor
 }
 
-void nodes_list_store::init(geom_parameters* geom_param_ptr)
+void nodes_list_store::init(geom_parameters* geom_param_ptr,dcel_mesh_data* mesh_data)
 {
 	// Set the geometry parameters
 	this->geom_param_ptr = geom_param_ptr;
+	this->mesh_data = mesh_data;
 
 	// Set the geometry parameters for the labels (and clear the labels)
-	node_points.init(geom_param_ptr);
-	selected_node_points.init(geom_param_ptr);
+	// node_points.init(geom_param_ptr);
+	// selected_node_points.init(geom_param_ptr);
 
 	// Clear the nodes
 	node_count = 0;
@@ -25,12 +26,14 @@ void nodes_list_store::init(geom_parameters* geom_param_ptr)
 
 }
 
-void nodes_list_store::add_node(int& node_id, glm::vec3& node_pt)
+void nodes_list_store::add_node(const int& node_id, const double& x_coord, const double& y_coord, const double& z_coord)
 {
 	// Add the node to the list
 	node_store temp_node;
 	temp_node.node_id = node_id;
-	temp_node.node_pt = node_pt;
+	temp_node.x_coord = x_coord; // x coordinate
+	temp_node.y_coord = y_coord; // y coordinate
+	temp_node.z_coord = z_coord; // z coordinate
 
 	//// Check whether the node_id is already there
 	//if (nodeMap.find(node_id) != nodeMap.end())
@@ -44,45 +47,48 @@ void nodes_list_store::add_node(int& node_id, glm::vec3& node_pt)
 	node_count++;
 
 	//__________________________ Add the node points
-	node_points.add_point(node_id, node_pt.x,node_pt.y,node_pt.z);
+	mesh_data->add_mesh_point(node_id, x_coord, y_coord, z_coord);
+
+
+	// node_points.add_point(node_id, node_pt.x,node_pt.y,node_pt.z);
 
 }
 
 void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node_ids)
 {
-	// Add to Selected Nodes
-	selected_node_points.clear_points();
+	//// Add to Selected Nodes
+	//selected_node_points.clear_points();
 
-	glm::vec3 temp_color = geom_param_ptr->geom_colors.selection_color;
-	glm::vec3 node_pt_offset = glm::vec3(0);
+	//glm::vec3 temp_color = geom_param_ptr->geom_colors.selection_color;
+	//glm::vec3 node_pt_offset = glm::vec3(0);
 
-	for (const auto& it : selected_node_ids)
-	{
-		selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt.x,
-				nodeMap[it].node_pt.y, nodeMap[it].node_pt.z);
-	}
+	//for (const auto& it : selected_node_ids)
+	//{
+	//	selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt.x,
+	//			nodeMap[it].node_pt.y, nodeMap[it].node_pt.z);
+	//}
 
-	selected_node_points.set_buffer();
+	//selected_node_points.set_buffer();
 }
 
-void nodes_list_store::set_buffer()
-{
-	// Set the buffers for the Model
-	node_points.set_buffer();
-}
-
-
-void nodes_list_store::paint_model_nodes()
-{
-	// Paint the model nodes
-	node_points.paint_points();
-}
-
-void nodes_list_store::paint_selected_model_nodes()
-{
-	// Paint the model nodes
-	selected_node_points.paint_points();
-}
+//void nodes_list_store::set_buffer()
+//{
+//	// Set the buffers for the Model
+//	// node_points.set_buffer();
+//}
+//
+//
+//void nodes_list_store::paint_model_nodes()
+//{
+//	// Paint the model nodes
+//	// node_points.paint_points();
+//}
+//
+//void nodes_list_store::paint_selected_model_nodes()
+//{
+//	// Paint the model nodes
+//	// selected_node_points.paint_points();
+//}
 
 
 std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2)
@@ -111,10 +117,11 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 
 
 	// Loop through all nodes in map
-	for (auto it = nodeMap.begin(); it != nodeMap.end(); ++it)
+	for (auto it = nodeMap.begin(); it != nodeMap.end(); it++)
 	{
-		const auto& node = it->second.node_pt;
-		glm::vec4 finalPosition = scaledModelMatrix * glm::vec4(node.x, node.y, 0, 1.0f) * geom_param_ptr->panTranslation;
+		node_store node = it->second;
+		// const auto& node = it->second.node_pt;
+		glm::vec4 finalPosition = scaledModelMatrix * glm::vec4(node.x_coord, node.y_coord, node.z_coord, 1.0f) * geom_param_ptr->panTranslation;
 
 		double node_position_x = finalPosition.x;
 		double node_position_y = finalPosition.y;
@@ -131,11 +138,11 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 }
 
 
-void nodes_list_store::update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
-{
-	// Update model openGL uniforms
-	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-
-}
+//void nodes_list_store::update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
+//	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
+//{
+//	// Update model openGL uniforms
+//	// node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
+//	// selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
+//
+//}

@@ -27,6 +27,7 @@
 #include "fe_objects/nodeinlcond_list_store.h"
 
 // Geometry Objects
+#include "geometry_objects/dcel_mesh_data.h"
 #include "geometry_objects/dynamic_selrectangle_store.h"
 
 // FE Result Objects Modal analysis
@@ -82,9 +83,11 @@ public:
 	// Functions to paint the geometry and results
 	void paint_geometry();
 private:
+	// geometry objects
 	dynamic_selrectangle_store selection_rectangle;
+	dcel_mesh_data mesh_data;
 
-	// Geometry objects
+	// Mesh objects
 	nodes_list_store model_nodes;
 	elementline_list_store model_lineelements;
 	elementtri_list_store model_trielements;

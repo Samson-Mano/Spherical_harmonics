@@ -1,5 +1,6 @@
 #pragma once
 #include "nodes_list_store.h"
+#include "../geometry_objects/label_list_store.h"
 
 struct load_data
 {
