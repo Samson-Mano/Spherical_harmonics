@@ -430,6 +430,26 @@ double geom_parameters::roundToSixDigits(const double& number)
 	return std::round(number * 1e6) / 1e6;
 }
 
+glm::vec3 geom_parameters::get_face_normal(const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3)
+{
+	// Calculate two vectors representing two sides of the triangle
+	glm::vec3 edge1 = pt2 - pt1;
+	glm::vec3 edge2 = pt3 - pt1;
+
+	// Calculate the cross product of the two edges
+	glm::vec3 normal = glm::cross(edge1, edge2);
+
+	// Check if the normal is pointing in the opposite direction of the camera (negative z)
+	// If so, reverse the order of points to ensure counter-clockwise ordering
+	if (normal.z < 0.0f)
+	{
+		return glm::normalize(-normal); // Return the reversed normal (negated)
+	}
+	else
+	{
+		return glm::normalize(normal); // Return the normal as is
+	}
+}
 
 
 //// Stop watch

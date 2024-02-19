@@ -2,9 +2,7 @@
 #include "../geometry_buffers/gBuffers.h"
 #include "../geom_parameters.h"
 
-struct tri_store; // forward declaraion
-
-struct line_store; // forward declaration
+struct tri_store; // forward declaration
 
 struct point_store
 {
@@ -13,6 +11,11 @@ struct point_store
 	double x_coord = 0.0; // x coordinate
 	double y_coord = 0.0; // y coordinate
 	double z_coord = 0.0; // z coordinate
+
+	glm::vec3 pt_coord() const
+	{
+		return glm::vec3(x_coord, y_coord, z_coord);
+	}
 };
 
 class point_list_store

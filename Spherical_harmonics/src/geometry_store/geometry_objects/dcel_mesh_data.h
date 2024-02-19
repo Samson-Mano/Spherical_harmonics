@@ -10,7 +10,6 @@ class dcel_mesh_data
 public:
 	point_list_store node_points;
 	point_list_store selected_node_points;
-	line_list_store mesh_half_edges;
 	line_list_store mesh_boundaries;
 	tri_list_store element_tris;
 	tri_list_store element_quads123;
@@ -54,11 +53,17 @@ public:
 		bool set_zoomtranslation, bool set_transparency);
 
 private:
+	int half_edge_count = 0;
+	std::vector<line_store*> mesh_half_edges; // All the Half edge data
+
+	int add_half_edge(const int& startPt_id, const int& endPt_id);
+
 	void add_triangle(const int& tri_id,
 		const int& point_id1,
 		const int& point_id2,
 		const int& point_id3,
-		tri_list_store& triangle);
+		tri_list_store* triangle);
 
+	void set_mesh_edge(line_store* edge,int& line_id,std::set<std::pair<int, int>>& seenLines);
 
 };

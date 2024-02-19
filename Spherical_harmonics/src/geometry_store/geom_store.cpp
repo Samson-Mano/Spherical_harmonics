@@ -305,14 +305,14 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 					break;
 				}
 
-				int tri_id = std::stoi(splitValues[0]); // Quadrilateral ID
+				int quad_id = std::stoi(splitValues[0]); // Quadrilateral ID
 				int nd1 = std::stoi(splitValues[1]); // Node id 1
 				int nd2 = std::stoi(splitValues[2]); // Node id 2
 				int nd3 = std::stoi(splitValues[3]); // Node id 3
 				int nd4 = std::stoi(splitValues[4]); // Node id 4
 
 				// Add the Triangle Elements
-				this->model_quadelements.add_elementquadrilateral(tri_id, &model_nodes.nodeMap[nd1], &model_nodes.nodeMap[nd2],
+				this->model_quadelements.add_elementquadrilateral(quad_id, &model_nodes.nodeMap[nd1], &model_nodes.nodeMap[nd2],
 					&model_nodes.nodeMap[nd3], &model_nodes.nodeMap[nd4]);
 				j++;
 			}
@@ -322,45 +322,6 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 			stopwatch_elapsed_str << stopwatch.elapsed();
 			std::cout << "Quadrilateral Elements read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
 		}
-
-
-		//if (inpt_type == "*EDGES")
-		//{
-		//	// Quad Element
-		//	while (j < lines.size())
-		//	{
-		//		std::istringstream elementIss(lines[j + 1]);
-
-		//		// Vector to store the split values
-		//		std::vector<std::string> splitValues;
-
-		//		// Split the string by comma
-		//		std::string token;
-		//		while (std::getline(elementIss, token, ','))
-		//		{
-		//			splitValues.push_back(token);
-		//		}
-
-		//		if (static_cast<int>(splitValues.size()) != 3)
-		//		{
-		//			break;
-		//		}
-
-		//		int line_id = std::stoi(splitValues[0]); // Line ID
-		//		int startnode_id = std::stoi(splitValues[1]); // Start Node id
-		//		int endnode_id = std::stoi(splitValues[2]); // End Node id
-
-		//		// Add the Edges
-		//		this->model_lineelements.add_elementline(line_id, &model_nodes.nodeMap[startnode_id],
-		//			&model_nodes.nodeMap[endnode_id]);
-		//		j++;
-		//	}
-
-
-		//	stopwatch_elapsed_str.str("");
-		//	stopwatch_elapsed_str << stopwatch.elapsed();
-		//	std::cout << "Element edges read completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
-		//}
 
 		// Iterate line
 		j++;
@@ -374,15 +335,12 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 		return;
 	}
 
-
 	// Set the mesh wire frame
 	this->mesh_data.set_mesh_wireframe();
 
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();
 	std::cout << "Mesh wireframe created at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
-
-
 
 	// Geometry is loaded
 	is_geometry_set = true;
@@ -402,12 +360,6 @@ void geom_store::load_model(const int& model_type, std::vector<std::string> inpu
 
 	// Set the geometry buffers
 	this->mesh_data.set_buffer();
-
-
-	//this->model_nodes.set_buffer();
-	//this->model_lineelements.set_buffer();
-	//this->model_trielements.set_buffer();
-	//this->model_quadelements.set_buffer();
 
 	// Set the constraints buffer
 	this->node_loads.set_buffer();
@@ -485,10 +437,6 @@ void geom_store::update_model_matrix()
 
 	// Update the model matrix
 	mesh_data.update_opengl_uniforms(true, false, false, false, true);
-	//model_nodes.update_geometry_matrices(true, false, false, false, true, false);
-	//model_lineelements.update_geometry_matrices(true, false, false, false, true, false);
-	//model_trielements.update_geometry_matrices(true, false, false, false, true, false);
-	//model_quadelements.update_geometry_matrices(true, false, false, false, true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(true, false, false, false, true, false);
@@ -524,11 +472,6 @@ void geom_store::update_model_zoomfit()
 	// Update the zoom scale and pan translation
 	mesh_data.update_opengl_uniforms(false, true, true, true, false);
 
-	//model_nodes.update_geometry_matrices(false, true, true, true, false, false);
-	//model_lineelements.update_geometry_matrices(false, true, true, true, false, false);
-	//model_trielements.update_geometry_matrices(false, true, true, true, false, false);
-	//model_quadelements.update_geometry_matrices(false, true, true, true, false, false);
-
 	//___________________
 	node_loads.update_geometry_matrices(false, true, true, true, false, false);
 	node_inldispl.update_geometry_matrices(false, true, true, true, false, false);
@@ -561,11 +504,6 @@ void geom_store::update_model_pan(glm::vec2& transl)
 	// Update the pan translation
 	mesh_data.update_opengl_uniforms(false, true, false, false, false);
 
-	//model_nodes.update_geometry_matrices(false, true,false, false, false, false);
-	//model_lineelements.update_geometry_matrices(false, true, false, false, false, false);
-	//model_trielements.update_geometry_matrices(false, true, false, false, false, false);
-	//model_quadelements.update_geometry_matrices(false, true, false, false, false, false);
-
 	//___________________
 	node_loads.update_geometry_matrices(false, true, false, false, false, false);
 	node_inldispl.update_geometry_matrices(false, true, false, false, false, false);
@@ -594,11 +532,6 @@ void geom_store::update_model_rotate(glm::mat4& rotation_m)
 
 	// Update the rotate translation
 	mesh_data.update_opengl_uniforms(false, false, true, false, false);
-
-	//model_nodes.update_geometry_matrices(false, false, true, false, false, false);
-	//model_lineelements.update_geometry_matrices(false, false, true, false, false, false);
-	//model_trielements.update_geometry_matrices(false, false, true, false, false, false);
-	//model_quadelements.update_geometry_matrices(false, false, true, false, false, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, true, false, false, false);
@@ -629,11 +562,6 @@ void geom_store::update_model_zoom(double& z_scale)
 
 	// Update the Zoom
 	mesh_data.update_opengl_uniforms(false, false, false, true, false);
-
-	//model_nodes.update_geometry_matrices(false, false, false, true, false, false);
-	//model_lineelements.update_geometry_matrices(false, false, false, true, false, false);
-	//model_trielements.update_geometry_matrices(false, false, false, true, false, false);
-	//model_quadelements.update_geometry_matrices(false, false, false, true, false, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, true, false, false);
@@ -671,11 +599,6 @@ void geom_store::update_model_transperency(bool is_transparent)
 
 	// Update the model transparency
 	mesh_data.update_opengl_uniforms(false, false, false, false, true);
-
-	//model_nodes.update_geometry_matrices(false, false, false, false, true, false);
-	//model_lineelements.update_geometry_matrices(false, false, false, false, true, false);
-	//model_quadelements.update_geometry_matrices(false, false, false, false, true, false);
-	//model_trielements.update_geometry_matrices(false, false, false, false, true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, false, true, false);
@@ -774,17 +697,12 @@ void geom_store::paint_model()
 		// Show the model elements
 		mesh_data.paint_triangles();
 		mesh_data.paint_quadrilaterals();
-
-		// model_trielements.paint_elementtriangles();
-		// model_quadelements.paint_elementquadrilaterals();
 	}
 
 	if (op_window->is_show_modeledeges == true)
 	{
 		// Show the model edges
 		mesh_data.paint_mesh_edges();
-
-		// model_lineelements.paint_elementlines();
 	}
 
 

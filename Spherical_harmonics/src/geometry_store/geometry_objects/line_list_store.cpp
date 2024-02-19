@@ -27,18 +27,10 @@ void line_list_store::init(geom_parameters* geom_param_ptr)
 	clear_lines();
 }
 
-void line_list_store::add_line(const int& line_id, point_store* start_pt, point_store* end_pt)
+void line_list_store::add_line(const int& line_id, point_store* start_pt, point_store* end_pt, const glm::vec3& line_normal)
 {
-	// Create a temporary points
-	line_store temp_ln;
-	temp_ln.line_id = line_id;
-
-	// Line points
-	temp_ln.start_pt = start_pt;
-	temp_ln.end_pt = end_pt;
-
 	// Add to the list
-	lineMap.push_back(temp_ln);
+	lineMap.push_back({line_id, start_pt,end_pt, nullptr,nullptr,nullptr, line_normal});
 
 	// Add to the line id map
 	lineId_Map.insert({ line_id, line_count });
@@ -51,28 +43,24 @@ line_store* line_list_store::get_line(const int& line_id)
 {
 	// Check whether line_id exists?
 	auto it = lineId_Map.find(line_id);
-	line_store* ln = nullptr;
 
 	if (it != lineId_Map.end())
 	{
+		// return the address of the line
 		// line id exists
-		ln = &lineMap[it->second];
+		return &lineMap[it->second];
 	}
 	else
 	{
 		// id not found
 		return nullptr;
 	}
-
-	// return the address of the line
-	return ln;
 }
-
 
 void line_list_store::set_buffer()
 {
-	// Define the node vertices of the model for a node (3 position) 
-	const unsigned int line_vertex_count = 3 * 2 * line_count;
+	// Define the node vertices of the model for a node (3 position & 3 normal) 
+	const unsigned int line_vertex_count = 6 * 2 * line_count;
 	float* line_vertices = new float[line_vertex_count];
 
 	unsigned int line_indices_count = 2 * line_count; // 1 indices to form a point
@@ -90,6 +78,7 @@ void line_list_store::set_buffer()
 
 	VertexBufferLayout line_pt_layout;
 	line_pt_layout.AddFloat(3);  // Node center
+	line_pt_layout.AddFloat(3);  // Node normal
 
 	unsigned int line_vertex_size = line_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -128,11 +117,11 @@ void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pant
 	if (set_modelmatrix == true)
 	{
 		// set the model matrix
-		line_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
+		// line_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
 		line_shader.setUniform("transparency", 1.0f);
 
-		line_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		line_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// line_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+		// line_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		line_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
@@ -170,8 +159,13 @@ void line_list_store::get_line_buffer(line_store& ln, float* line_vertices, unsi
 	line_vertices[line_v_index + 1] = ln.start_pt->y_coord;
 	line_vertices[line_v_index + 2] = ln.start_pt->z_coord;
 
+	// Point normal
+	line_vertices[line_v_index + 3] = ln.line_normal.x;
+	line_vertices[line_v_index + 4] = ln.line_normal.y;
+	line_vertices[line_v_index + 5] = ln.line_normal.z;
+
 	// Iterate
-	line_v_index = line_v_index + 3;
+	line_v_index = line_v_index + 6;
 
 	// End Point
 	// Point location
@@ -179,8 +173,13 @@ void line_list_store::get_line_buffer(line_store& ln, float* line_vertices, unsi
 	line_vertices[line_v_index + 1] = ln.end_pt->y_coord;
 	line_vertices[line_v_index + 2] = ln.end_pt->z_coord;
 
+	// Point normal
+	line_vertices[line_v_index + 3] = ln.line_normal.x;
+	line_vertices[line_v_index + 4] = ln.line_normal.y;
+	line_vertices[line_v_index + 5] = ln.line_normal.z;
+
 	// Iterate
-	line_v_index = line_v_index + 3;
+	line_v_index = line_v_index + 6;
 
 	//__________________________________________________________________________
 	// Add the indices

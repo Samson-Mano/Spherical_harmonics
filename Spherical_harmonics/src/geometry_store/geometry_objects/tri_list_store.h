@@ -11,6 +11,9 @@ struct tri_store
 	line_store* edge1 = nullptr; // Triangle edge 1
 	line_store* edge2 = nullptr; // Triangle edge 2
 	line_store* edge3 = nullptr; // Triangle edge 3
+
+	// face normal
+	glm::vec3 face_normal = glm::vec3(0); // Face normal of the triangle
 };
 
 
@@ -20,7 +23,7 @@ public:
 	geom_parameters* geom_param_ptr = nullptr;
 	unsigned int tri_count = 0;
 	std::unordered_map<int, int> triId_Map;
-	std::vector<tri_store> triMap;
+	std::vector<tri_store*> triMap;
 
 	tri_list_store();
 	~tri_list_store();
@@ -38,7 +41,7 @@ private:
 	gBuffers tri_buffer;
 	Shader tri_shader;
 
-	void get_tri_buffer(tri_store& tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index);
+	void get_tri_buffer(tri_store* tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index);
 
 
 };

@@ -11,8 +11,9 @@ struct line_store
 	line_store* next_line = nullptr;        // Next half-edge in the same face
 	line_store* twin_line = nullptr;        // Opposite half-edge
 	tri_store* face = nullptr;    // Face to the left of this half-edge
-};
 
+	glm::vec3 line_normal = glm::vec3(0); // Normal of edges (It is based on the two faces its attached to)
+};
 
 
 class line_list_store
@@ -26,7 +27,7 @@ public:
 	line_list_store();
 	~line_list_store();
 	void init(geom_parameters* geom_param_ptr);
-	void add_line(const int& line_id, point_store* start_pt, point_store* end_pt);
+	void add_line(const int& line_id, point_store* start_pt, point_store* end_pt, const glm::vec3& line_normal);
 	line_store* get_line(const int& line_id);
 
 	void set_buffer();

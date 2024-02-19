@@ -29,15 +29,8 @@ void point_list_store::init(geom_parameters* geom_param_ptr)
 
 void point_list_store::add_point(const int& point_id, const double& x_coord, const double& y_coord, const double& z_coord)
 {
-	// Create a temporary points
-	point_store temp_pt;
-	temp_pt.point_id = point_id;
-	temp_pt.x_coord = x_coord;
-	temp_pt.y_coord = y_coord;
-	temp_pt.z_coord = z_coord;
-
 	// Add to the list
-	pointMap.push_back(temp_pt);
+	pointMap.push_back({point_id, x_coord,y_coord,z_coord});
 
 	// Add to the point id map
 	pointId_Map.insert({ point_id, point_count });
@@ -50,28 +43,25 @@ point_store* point_list_store::get_point(const int& point_id)
 {
 	// Check whether point_id exists?
 	auto it = pointId_Map.find(point_id);
-	point_store* pt = nullptr;
 
 	if (it != pointId_Map.end())
 	{
 		// Point id exists
-		pt = &pointMap[it->second];
+		// return the address of the point
+		return &pointMap[it->second];
 	}
 	else
 	{
 		// id not found
 		return nullptr;
 	}
-
-	// return the address of the point
-	return pt;
 }
 
 
 void point_list_store::set_buffer()
 {
-	// Define the node vertices of the model for a node (3 position) 
-	const unsigned int point_vertex_count = 3 * point_count;
+	// Define the node vertices of the model for a node (3 position & 3 normal) 
+	const unsigned int point_vertex_count = 6 * point_count;
 	float* point_vertices = new float[point_vertex_count];
 
 	unsigned int point_indices_count = 1 * point_count; // 1 indices to form a point
@@ -89,6 +79,7 @@ void point_list_store::set_buffer()
 
 	VertexBufferLayout node_layout;
 	node_layout.AddFloat(3);  // Node center
+	node_layout.AddFloat(3);  // Node normal
 
 	unsigned int point_vertex_size = point_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -124,11 +115,11 @@ void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pan
 	if (set_modelmatrix == true)
 	{
 		// set the model matrix
-		point_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
+		// point_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
 		point_shader.setUniform("transparency", 1.0f);
 
-		point_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		point_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// point_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+		// point_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		point_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
@@ -165,8 +156,15 @@ void point_list_store::get_node_buffer(point_store& pt, float* point_vertices, u
 	point_vertices[point_v_index + 1] = pt.y_coord;
 	point_vertices[point_v_index + 2] = pt.z_coord;
 
+	// Point Normal (Normal to Geometry center)
+	glm::vec3 pt_normal = glm::normalize(pt.pt_coord());
+
+	point_vertices[point_v_index + 3] = pt_normal.x;
+	point_vertices[point_v_index + 4] = pt_normal.y;
+	point_vertices[point_v_index + 5] = pt_normal.z;
+
 	// Iterate
-	point_v_index = point_v_index + 3;
+	point_v_index = point_v_index + 6;
 
 	//__________________________________________________________________________
 	// Add the indices

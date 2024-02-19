@@ -151,7 +151,8 @@ void nodeinlcond_list_store::set_buffer()
 		pt_id++;
 
 		// Add the initial condition line
-		inlcond_lines.add_line(ln_id, inlcond_points.get_point(pt_id-2), inlcond_points.get_point(pt_id - 1));
+		glm::vec3 normal = glm::vec3(0);
+		inlcond_lines.add_line(ln_id, inlcond_points.get_point(pt_id-2), inlcond_points.get_point(pt_id - 1),normal);
 
 		ln_id++;
 	}

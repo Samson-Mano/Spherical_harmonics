@@ -29,22 +29,26 @@ void tri_list_store::init(geom_parameters* geom_param_ptr)
 
 void tri_list_store::add_tri(const int& tri_id, line_store* edge1, line_store* edge2, line_store* edge3)
 {
-	// Create a temporary points
-	tri_store temp_tri;
-	temp_tri.tri_id = tri_id;
-
-	// Boundary edges
-	temp_tri.edge1 = edge1;
-	temp_tri.edge2 = edge2;
-	temp_tri.edge3 = edge3;
-
 	// Add to the list
+	tri_store* temp_tri = new tri_store;
+
+	temp_tri->tri_id = tri_id;
+	temp_tri->edge1 = edge1;
+	temp_tri->edge2 = edge2;
+	temp_tri->edge3 = edge3;
+
+	// Find the normal of the face
+	temp_tri->face_normal = geom_param_ptr->get_face_normal(edge1->start_pt->pt_coord(),
+		edge2->start_pt->pt_coord(),
+		edge3->start_pt->pt_coord());
+
+
 	triMap.push_back(temp_tri);
 
 	// Add to the tri id map
 	triId_Map.insert({ tri_id, tri_count });
 
-		// Iterate the point count
+	// Iterate the point count
 	tri_count++;
 }
 
@@ -53,29 +57,25 @@ tri_store* tri_list_store::get_triangle(const int& tri_id)
 {
 	// Check whether tri_id exists?
 	auto it = triId_Map.find(tri_id);
-	tri_store* tri = nullptr;
 
 	if (it != triId_Map.end())
 	{
 		// tri id exists
-		tri = &triMap[it->second];
+		// return the address of the triangle
+		return triMap[it->second];
 	}
 	else
 	{
 		// id not found
 		return nullptr;
 	}
-
-	// return the address of the triangle
-	return tri;
-
 }
 
 
 void tri_list_store::set_buffer()
 {
-	// Define the tri vertices of the model for a node (3 position) 
-	const unsigned int tri_vertex_count = 3 * 3 * tri_count;
+	// Define the tri vertices of the model for a node (3 position & 3 normal) 
+	const unsigned int tri_vertex_count = 6 * 3 * tri_count;
 	float* tri_vertices = new float[tri_vertex_count];
 
 	unsigned int tri_indices_count = 3 * tri_count; // 3 indices to form a triangle
@@ -93,6 +93,7 @@ void tri_list_store::set_buffer()
 
 	VertexBufferLayout tri_pt_layout;
 	tri_pt_layout.AddFloat(3);  // Node center
+	tri_pt_layout.AddFloat(3);  // Node normal
 
 	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the node_vertex
 
@@ -128,11 +129,11 @@ void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	if (set_modelmatrix == true)
 	{
 		// set the model matrix
-		tri_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
+		// tri_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
 		tri_shader.setUniform("transparency", 0.8f);
 
-		tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		tri_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+		// tri_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		tri_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
@@ -161,36 +162,50 @@ void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	}
 }
 
-void tri_list_store::get_tri_buffer(tri_store& tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
+void tri_list_store::get_tri_buffer(tri_store* tri, float* tri_vertices, unsigned int& tri_v_index, unsigned int* tri_vertex_indices, unsigned int& tri_i_index)
 {
 	// Get the three node buffer for the shader
 	// Point 1
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge1->start_pt->x_coord;
-	tri_vertices[tri_v_index + 1] = tri.edge1->start_pt->y_coord;
-	tri_vertices[tri_v_index + 2] = tri.edge1->start_pt->z_coord;
+	tri_vertices[tri_v_index + 0] = tri->edge1->start_pt->x_coord;
+	tri_vertices[tri_v_index + 1] = tri->edge1->start_pt->y_coord;
+	tri_vertices[tri_v_index + 2] = tri->edge1->start_pt->z_coord;
+
+	// Point normal
+	tri_vertices[tri_v_index + 3] = tri->face_normal.x;
+	tri_vertices[tri_v_index + 4] = tri->face_normal.y;
+	tri_vertices[tri_v_index + 5] = tri->face_normal.z;
 
 	// Iterate
-	tri_v_index = tri_v_index + 3;
+	tri_v_index = tri_v_index + 6;
 
 	// Point 2
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge2->start_pt->x_coord;
-	tri_vertices[tri_v_index + 1] = tri.edge2->start_pt->y_coord;
-	tri_vertices[tri_v_index + 2] = tri.edge2->start_pt->z_coord;
+	tri_vertices[tri_v_index + 0] = tri->edge2->start_pt->x_coord;
+	tri_vertices[tri_v_index + 1] = tri->edge2->start_pt->y_coord;
+	tri_vertices[tri_v_index + 2] = tri->edge2->start_pt->z_coord;
+
+	// Point normal
+	tri_vertices[tri_v_index + 3] = tri->face_normal.x;
+	tri_vertices[tri_v_index + 4] = tri->face_normal.y;
+	tri_vertices[tri_v_index + 5] = tri->face_normal.z;
 
 	// Iterate
-	tri_v_index = tri_v_index + 3;
+	tri_v_index = tri_v_index + 6;
 
 	// Point 3
 	// Point location
-	tri_vertices[tri_v_index + 0] = tri.edge3->start_pt->x_coord;
-	tri_vertices[tri_v_index + 1] = tri.edge3->start_pt->y_coord;
-	tri_vertices[tri_v_index + 2] = tri.edge3->start_pt->z_coord;
+	tri_vertices[tri_v_index + 0] = tri->edge3->start_pt->x_coord;
+	tri_vertices[tri_v_index + 1] = tri->edge3->start_pt->y_coord;
+	tri_vertices[tri_v_index + 2] = tri->edge3->start_pt->z_coord;
 
+	// Point normal
+	tri_vertices[tri_v_index + 3] = tri->face_normal.x;
+	tri_vertices[tri_v_index + 4] = tri->face_normal.y;
+	tri_vertices[tri_v_index + 5] = tri->face_normal.z;
 
 	// Iterate
-	tri_v_index = tri_v_index + 3;
+	tri_v_index = tri_v_index + 6;
 
 	//__________________________________________________________________________
 	// Add the indices

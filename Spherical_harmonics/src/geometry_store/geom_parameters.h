@@ -166,6 +166,8 @@ public:
 
 	static double roundToSixDigits(const double& number);
 
+	static glm::vec3 get_face_normal(const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3);
+
 private:
 	static double HueToRGB(double v1, double v2, double vH);
 
