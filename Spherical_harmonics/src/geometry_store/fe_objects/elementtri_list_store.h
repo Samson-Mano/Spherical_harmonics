@@ -11,8 +11,6 @@ struct elementtri_store
 	node_store* nd3 = nullptr; // node 3
 };
 
-
-
 class elementtri_list_store
 {
 public:
@@ -25,21 +23,8 @@ public:
 	void init(geom_parameters* geom_param_ptr, dcel_mesh_data* mesh_data);
 	void add_elementtriangle(int& tri_id, node_store* nd1, node_store* nd2, node_store* nd3);
 
-
-	//void set_buffer();
-	//void paint_elementtriangles();
-	//void paint_selected_elementtriangles();
-	//void paint_elementtriangles_shrunk();
-
-	//void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	//	bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
-
 private:
 	geom_parameters* geom_param_ptr = nullptr;
 	dcel_mesh_data* mesh_data = nullptr;
-
-	//tri_list_store element_tris;
-	//tri_list_store element_tris_shrunk;
-	//tri_list_store selected_element_tris_shrunk;
 
 };

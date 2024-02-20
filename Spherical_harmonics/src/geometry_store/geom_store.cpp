@@ -705,38 +705,32 @@ void geom_store::paint_model()
 		mesh_data.paint_mesh_edges();
 	}
 
+	if (op_window->is_show_meshnormals == true)
+	{
+		// Show the mesh normals
+		mesh_data.paint_mesh_normals();
+	}
 
 	if (op_window->is_show_inlcondition == true)
 	{
 		// Show the node initial condition
 		// Initial Displacement
 		node_inldispl.paint_inlcond();
-		// node_inldispl.paint_inlcond_label();
 
 		// Initial Velocity
 		node_inlvelo.paint_inlcond();
-		// node_inlvelo.paint_inlcond_label();
-
 	}
 
 	if (op_window->is_show_modelnodes == true)
 	{
 		// Show the model nodes
 		mesh_data.paint_points();
-
-		// model_nodes.paint_model_nodes();
 	}
 
 	if (op_window->is_show_loads == true)
 	{
 		// Show the node Loads
 		node_loads.paint_loads();
-
-		if (op_window->is_show_loadvalues == true)
-		{
-			// Show the node load values
-			node_loads.paint_load_labels();
-		}
 	}
 
 	if (nd_inlcond_window->is_show_window == true)

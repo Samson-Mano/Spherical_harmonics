@@ -20,15 +20,8 @@ public:
 	void init(geom_parameters* geom_param_ptr, dcel_mesh_data* mesh_data);
 	void add_elementline(const int& line_id, node_store* startNode, node_store* endNode);
 
-
-	// void set_buffer();
-	// void paint_elementlines();
-
-	//void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	//	bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
-
 private:
 	geom_parameters* geom_param_ptr = nullptr;
 	dcel_mesh_data* mesh_data = nullptr;
-	// line_list_store element_lines;
+
 };

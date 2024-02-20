@@ -30,9 +30,11 @@ void geom_parameters::init()
 	//geom_colors.node_color = glm::vec3(0.54509f, 0.0f, 0.4f); // Dark Red
 	//geom_colors.line_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Dark Orange
 
-	geom_colors.point_color = glm::vec3(0.8f, 0.2f, 0.2f); // Light Red
-	geom_colors.edge_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Dark Orange
-	geom_colors.triangle_color = glm::vec3(0.90196f, 0.90196f, 0.98039f); // Lavender
+	glm::vec3 mesh_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Lavender   glm::vec3(0.90196f, 0.90196f, 0.98039f)
+
+	geom_colors.point_color = mesh_color; // Light Red glm::vec3(0.8f, 0.2f, 0.2f);
+	geom_colors.edge_color = mesh_color *0.7f;  // Dark Orange  glm::vec3(1.0f, 0.54901f, 0.6f);
+	geom_colors.triangle_color = mesh_color;  // Lavender  
 
 	geom_colors.ptmass_color = glm::vec3(0.2f, 0.7f, 0.2f); // Green
 	geom_colors.constraint_color = glm::vec3(0.5f, 0.5f, 0.5f); // Gray
@@ -439,16 +441,8 @@ glm::vec3 geom_parameters::get_face_normal(const glm::vec3& pt1, const glm::vec3
 	// Calculate the cross product of the two edges
 	glm::vec3 normal = glm::cross(edge1, edge2);
 
-	// Check if the normal is pointing in the opposite direction of the camera (negative z)
-	// If so, reverse the order of points to ensure counter-clockwise ordering
-	if (normal.z < 0.0f)
-	{
-		return glm::normalize(-normal); // Return the reversed normal (negated)
-	}
-	else
-	{
-		return glm::normalize(normal); // Return the normal as is
-	}
+	return glm::normalize(normal); // Return the normal
+
 }
 
 

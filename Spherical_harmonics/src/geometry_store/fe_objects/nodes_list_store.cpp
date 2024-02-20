@@ -16,10 +16,6 @@ void nodes_list_store::init(geom_parameters* geom_param_ptr,dcel_mesh_data* mesh
 	this->geom_param_ptr = geom_param_ptr;
 	this->mesh_data = mesh_data;
 
-	// Set the geometry parameters for the labels (and clear the labels)
-	// node_points.init(geom_param_ptr);
-	// selected_node_points.init(geom_param_ptr);
-
 	// Clear the nodes
 	node_count = 0;
 	nodeMap.clear();
@@ -49,9 +45,6 @@ void nodes_list_store::add_node(const int& node_id, const double& x_coord, const
 	//__________________________ Add the node points
 	mesh_data->add_mesh_point(node_id, x_coord, y_coord, z_coord);
 
-
-	// node_points.add_point(node_id, node_pt.x,node_pt.y,node_pt.z);
-
 }
 
 void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node_ids)
@@ -70,25 +63,6 @@ void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node
 
 	//selected_node_points.set_buffer();
 }
-
-//void nodes_list_store::set_buffer()
-//{
-//	// Set the buffers for the Model
-//	// node_points.set_buffer();
-//}
-//
-//
-//void nodes_list_store::paint_model_nodes()
-//{
-//	// Paint the model nodes
-//	// node_points.paint_points();
-//}
-//
-//void nodes_list_store::paint_selected_model_nodes()
-//{
-//	// Paint the model nodes
-//	// selected_node_points.paint_points();
-//}
 
 
 std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2)
@@ -137,12 +111,3 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 	return selected_node_index;
 }
 
-
-//void nodes_list_store::update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-//	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
-//{
-//	// Update model openGL uniforms
-//	// node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-//	// selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-//
-//}

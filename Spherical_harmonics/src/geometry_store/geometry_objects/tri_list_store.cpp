@@ -130,7 +130,7 @@ void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	{
 		// set the model matrix
 		// tri_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		tri_shader.setUniform("transparency", 0.8f);
+		tri_shader.setUniform("transparency", 1.0f);
 
 		// tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
 		// tri_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);

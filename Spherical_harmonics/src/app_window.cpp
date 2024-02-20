@@ -150,7 +150,6 @@ void app_window::app_render()
 	glEnable(GL_DEPTH_CLAMP);
 	// glEnable(GL_DEPTH_TEST); // Enable depth testing
 
-
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_MULTISAMPLE);

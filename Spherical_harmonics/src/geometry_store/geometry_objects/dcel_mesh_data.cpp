@@ -20,7 +20,8 @@ void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 	node_points.init(geom_param_ptr);
 	selected_node_points.init(geom_param_ptr);
 	
-	// Mesh boundaries
+	// Mesh boundaries & mesh normals
+	mesh_normals.init(geom_param_ptr);
 	mesh_boundaries.init(geom_param_ptr);
 
 	// Mesh data
@@ -151,8 +152,9 @@ void dcel_mesh_data::set_mesh_wireframe()
 	}
 
 	//_________________________________________________________________________________________________
-	// Step 2: Set the mesh boundaries
+	// Step 2: Set the mesh boundaries & mesh normals
 	mesh_boundaries.clear_lines();
+	mesh_normals.clear_lines();
 
 	std::set<std::pair<int, int>> seenLines;
 	int line_id = 0;
@@ -168,6 +170,9 @@ void dcel_mesh_data::set_mesh_wireframe()
 
 		// Edge 3
 		set_mesh_edge(tri->edge3, line_id, seenLines);
+
+		// Set the mesh normal
+		set_mesh_normal(tri);
 	}
 
 	// Quadrilaterals
@@ -182,6 +187,9 @@ void dcel_mesh_data::set_mesh_wireframe()
 
 		// Edge 3
 		// Do Not Add - because its quadrialteral's diagonal
+
+		// Set the mesh normal
+		set_mesh_normal(tri);
 	}
 
 	// Half triangle 2
@@ -195,6 +203,9 @@ void dcel_mesh_data::set_mesh_wireframe()
 
 		// Edge 3
 		// Do Not Add - because its quadrialteral's diagonal
+
+		// Set the mesh normal
+		set_mesh_normal(tri);
 	}
 
 }
@@ -241,6 +252,33 @@ void dcel_mesh_data::set_mesh_edge(line_store* edge,int& line_id, std::set<std::
 	}
 }
 
+void dcel_mesh_data::set_mesh_normal(tri_store* tri)
+{
+	// Get the geometric center of the triangle
+	// Function returns the geometric center of four nodes
+	glm::vec3 face_center(0);
+
+	face_center += tri->edge1->start_pt->pt_coord();
+	face_center += tri->edge2->start_pt->pt_coord();
+	face_center += tri->edge3->start_pt->pt_coord();
+	
+	face_center =  face_center / 3.0f;
+
+	point_store* pt1 = new point_store;
+	pt1->x_coord = face_center.x;
+	pt1->y_coord = face_center.y;
+	pt1->z_coord = face_center.z;
+
+	point_store* pt2 = new point_store;
+	pt2->x_coord = face_center.x + 10.0 * tri->face_normal.x;
+	pt2->y_coord = face_center.y + 10.0 * tri->face_normal.y;
+	pt2->z_coord = face_center.z + 10.0 * tri->face_normal.z;
+
+	int normal_id = mesh_normals.line_count;
+	mesh_normals.add_line(normal_id, pt1, pt2, tri->face_normal);
+
+}
+
 
 void dcel_mesh_data::clear_mesh()
 {
@@ -253,7 +291,8 @@ void dcel_mesh_data::clear_mesh()
 	node_points.clear_points();
 	selected_node_points.clear_points();
 
-	// Mesh boundaries
+	// Mesh boundaries & mesh normals
+	mesh_normals.clear_lines();
 	mesh_boundaries.clear_lines();
 
 	// Mesh data
@@ -267,6 +306,7 @@ void dcel_mesh_data::set_buffer()
 {
 	// Set the buffer
 	node_points.set_buffer();
+	mesh_normals.set_buffer();
 	mesh_boundaries.set_buffer();
 	element_tris.set_buffer();
 	element_quads123.set_buffer(); 
@@ -295,6 +335,13 @@ void dcel_mesh_data::paint_mesh_edges()
 
 }
 
+void dcel_mesh_data::paint_mesh_normals()
+{
+	// Paint the mesh normals
+	mesh_normals.paint_lines();
+
+}
+
 void dcel_mesh_data::paint_triangles()
 {
 	// Paint the triangles
@@ -317,6 +364,7 @@ void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	// Update the openGL uniform values of geometry
 	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	element_quads123.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);

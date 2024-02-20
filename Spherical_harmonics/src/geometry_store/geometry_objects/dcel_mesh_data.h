@@ -11,6 +11,7 @@ public:
 	point_list_store node_points;
 	point_list_store selected_node_points;
 	line_list_store mesh_boundaries;
+	line_list_store mesh_normals;
 	tri_list_store element_tris;
 	tri_list_store element_quads123;
 	tri_list_store element_quads341;
@@ -45,6 +46,7 @@ public:
 
 	void paint_points();
 	void paint_selected_points();
+	void paint_mesh_normals();
 	void paint_mesh_edges();
 	void paint_triangles();
 	void paint_quadrilaterals();
@@ -66,4 +68,5 @@ private:
 
 	void set_mesh_edge(line_store* edge,int& line_id,std::set<std::pair<int, int>>& seenLines);
 
+	void set_mesh_normal(tri_store* tri);
 };
