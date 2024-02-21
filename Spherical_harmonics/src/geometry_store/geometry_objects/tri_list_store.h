@@ -4,7 +4,7 @@
 
 struct tri_store
 {
-	// store the individual point
+	// store the individual Triangle
 	int tri_id = -1;
 
 	// Edges
@@ -14,6 +14,7 @@ struct tri_store
 
 	// face normal
 	glm::vec3 face_normal = glm::vec3(0); // Face normal of the triangle
+	glm::vec3 geom_center = glm::vec3(0); // Geometric center of the triangle
 };
 
 

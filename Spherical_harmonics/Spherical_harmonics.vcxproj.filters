@@ -186,6 +186,9 @@
     <ClCompile Include="src\geometry_store\geometry_objects\dcel_mesh_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\geometry_objects\quad_list_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\dlls\freetype.dll" />
@@ -396,6 +399,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\geometry_objects\dcel_mesh_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\geometry_objects\quad_list_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include "point_list_store.h"
 #include "line_list_store.h"
 #include "tri_list_store.h"
+#include "quad_list_store.h"
 
 class dcel_mesh_data
 {
@@ -13,8 +14,8 @@ public:
 	line_list_store mesh_boundaries;
 	line_list_store mesh_normals;
 	tri_list_store element_tris;
-	tri_list_store element_quads123;
-	tri_list_store element_quads341;
+	quad_list_store element_quads;
+	
 
 	dcel_mesh_data();
 	~dcel_mesh_data();
@@ -60,13 +61,9 @@ private:
 
 	int add_half_edge(const int& startPt_id, const int& endPt_id);
 
-	void add_triangle(const int& tri_id,
-		const int& point_id1,
-		const int& point_id2,
-		const int& point_id3,
-		tri_list_store* triangle);
-
 	void set_mesh_edge(line_store* edge,int& line_id,std::set<std::pair<int, int>>& seenLines);
 
 	void set_mesh_normal(tri_store* tri);
+
+	void set_mesh_normal(quad_store* quad);
 };

@@ -30,7 +30,7 @@ void main()
 
     // Send the vertex normal to the fragment shader
 	//calculate normal in world coordinates
-    vec4 surfNormal = (scaledModelMatrix * vec4(node_normal,1.0f));
+    vec4 surfNormal = ((scaledModelMatrix) * vec4(node_normal,1.0f));
     v_Normal = normalize(surfNormal.xyz);
 
     v_Color = ptColor;

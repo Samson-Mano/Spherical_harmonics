@@ -26,8 +26,8 @@ void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 
 	// Mesh data
 	element_tris.init(geom_param_ptr);
-	element_quads123.init(geom_param_ptr);
-	element_quads341.init(geom_param_ptr);
+	element_quads.init(geom_param_ptr);
+
 }
 
 void dcel_mesh_data::add_mesh_point(const int& point_id, const double& x_coord, const double& y_coord, const double& z_coord)
@@ -48,37 +48,12 @@ void dcel_mesh_data::add_mesh_triangle(const int& tri_id, const int& point_id1, 
 	//    | /    
 	//    1      
 
-	add_triangle(tri_id, point_id1, point_id2, point_id3, &element_tris);
-
-}
-
-void dcel_mesh_data::add_mesh_quadrilateral(const int& quad_id,	const int& point_id1,	const int& point_id2,	const int& point_id3,	const int& point_id4)
-{
-	//   2______3     2____3      3
-	//   |      |     |   /     / |
-	//   |      |     | /     /   | 
-	//   1______4     1      1____4    
-
-	// Add the half triangle of the quadrilaterals
-	
-	// Add half triangle 1
-	add_triangle(quad_id, point_id1, point_id2, point_id3, &element_quads123);
-
-	// Add hald triangle 2
-	add_triangle(quad_id, point_id3, point_id4, point_id1, &element_quads341);
-
-}
-
-
-void dcel_mesh_data::add_triangle(const int& tri_id, const int& point_id1,	const int& point_id2, const int& point_id3,
-	tri_list_store* triangle)
-{
 	// Add the half triangle of the quadrilaterals
 	// Add three half edges
 	int line_id1, line_id2, line_id3;
 
 	// Add edge 1
-	line_id1 = add_half_edge(point_id1,point_id2);
+	line_id1 = add_half_edge(point_id1, point_id2);
 
 	// Add edge 2
 	line_id2 = add_half_edge(point_id2, point_id3);
@@ -89,7 +64,7 @@ void dcel_mesh_data::add_triangle(const int& tri_id, const int& point_id1,	const
 
 	//________________________________________
 	// Add the mesh triangles
-	triangle->add_tri(tri_id, mesh_half_edges[line_id1],
+	element_tris.add_tri(tri_id, mesh_half_edges[line_id1],
 		mesh_half_edges[line_id2],
 		mesh_half_edges[line_id3]);
 
@@ -100,11 +75,86 @@ void dcel_mesh_data::add_triangle(const int& tri_id, const int& point_id1,	const
 	mesh_half_edges[line_id3]->next_line = mesh_half_edges[line_id1];
 
 	// Set the half edge face data
-	mesh_half_edges[line_id1]->face = triangle->get_triangle(tri_id);
-	mesh_half_edges[line_id2]->face = triangle->get_triangle(tri_id);
-	mesh_half_edges[line_id3]->face = triangle->get_triangle(tri_id);
+	tri_store* temp_tri = element_tris.get_triangle(tri_id);
+
+	mesh_half_edges[line_id1]->face = temp_tri;
+	mesh_half_edges[line_id2]->face = temp_tri;
+	mesh_half_edges[line_id3]->face = temp_tri;
+
 
 }
+
+void dcel_mesh_data::add_mesh_quadrilateral(const int& quad_id,	const int& point_id1,	const int& point_id2,	const int& point_id3,	const int& point_id4)
+{
+	//   2______3     2____3      3
+	//   |      |     |   /     / |
+	//   |      |     | /     /   | 
+	//   1______4     1      1____4    
+
+	// Add the quadrilaterals
+	// Add the 1st half triangle of the quadrilaterals
+	// Add three half edges
+	int line_id1, line_id2, line_id3;
+
+	// Add edge 1
+	line_id1 = add_half_edge(point_id1, point_id2);
+
+	// Add edge 2
+	line_id2 = add_half_edge(point_id2, point_id3);
+
+	// Add edge 3
+	line_id3 = add_half_edge(point_id3, point_id1);
+
+	// Set the half edges next line
+	mesh_half_edges[line_id1]->next_line = mesh_half_edges[line_id2];
+	mesh_half_edges[line_id2]->next_line = mesh_half_edges[line_id3];
+	mesh_half_edges[line_id3]->next_line = mesh_half_edges[line_id1];
+
+
+	// Add the 2nd half triangle of the quadrilaterals
+	// Add three half edges
+	int line_id4, line_id5, line_id6;
+
+	// Add edge 4
+	line_id4 = add_half_edge(point_id3, point_id4);
+
+	// Add edge 5
+	line_id5 = add_half_edge(point_id4, point_id1);
+
+	// Add edge 6
+	line_id6 = add_half_edge(point_id1, point_id3);
+
+
+	// Set the half edges next line
+	mesh_half_edges[line_id4]->next_line = mesh_half_edges[line_id5];
+	mesh_half_edges[line_id5]->next_line = mesh_half_edges[line_id6];
+	mesh_half_edges[line_id6]->next_line = mesh_half_edges[line_id4];
+
+
+	//________________________________________
+	// Add the mesh quadrilaterals
+	element_quads.add_quad(quad_id, mesh_half_edges[line_id1],
+		mesh_half_edges[line_id2],
+		mesh_half_edges[line_id4],
+		mesh_half_edges[line_id5]);
+
+	// Set the half edge face data 1st Half triangle of the quadrilateral
+	tri_store* temp_tri123 = element_quads.get_quadrilateral_face123(quad_id);
+
+	mesh_half_edges[line_id1]->face = temp_tri123;
+	mesh_half_edges[line_id2]->face = temp_tri123;
+	mesh_half_edges[line_id3]->face = temp_tri123;
+
+	// Set the half edge face data 2nd Half triangle of the quadrilateral
+	tri_store* temp_tri341 = element_quads.get_quadrilateral_face341(quad_id);
+
+	mesh_half_edges[line_id4]->face = temp_tri341;
+	mesh_half_edges[line_id5]->face = temp_tri341;
+	mesh_half_edges[line_id6]->face = temp_tri341;
+
+
+}
+
 
 int dcel_mesh_data::add_half_edge(const int& startPt_id, const int& endPt_id)
 {
@@ -176,36 +226,22 @@ void dcel_mesh_data::set_mesh_wireframe()
 	}
 
 	// Quadrilaterals
-	// Half triangle 1
-	for (const auto& tri : element_quads123.triMap)
+	for (const auto& quad : element_quads.quadMap)
 	{
 		// Edge 1
-		set_mesh_edge(tri->edge1, line_id, seenLines);
+		set_mesh_edge(quad->tri123->edge1, line_id, seenLines);
 
 		// Edge 2
-		set_mesh_edge(tri->edge2, line_id, seenLines);
+		set_mesh_edge(quad->tri123->edge2, line_id, seenLines);
 
 		// Edge 3
-		// Do Not Add - because its quadrialteral's diagonal
+		set_mesh_edge(quad->tri341->edge1, line_id, seenLines);
+
+		// Edge 4
+		set_mesh_edge(quad->tri341->edge2, line_id, seenLines);
 
 		// Set the mesh normal
-		set_mesh_normal(tri);
-	}
-
-	// Half triangle 2
-	for (const auto& tri : element_quads341.triMap)
-	{
-		// Edge 1
-		set_mesh_edge(tri->edge1, line_id, seenLines);
-
-		// Edge 2
-		set_mesh_edge(tri->edge2, line_id, seenLines);
-
-		// Edge 3
-		// Do Not Add - because its quadrialteral's diagonal
-
-		// Set the mesh normal
-		set_mesh_normal(tri);
+		set_mesh_normal(quad);
 	}
 
 }
@@ -255,27 +291,39 @@ void dcel_mesh_data::set_mesh_edge(line_store* edge,int& line_id, std::set<std::
 void dcel_mesh_data::set_mesh_normal(tri_store* tri)
 {
 	// Get the geometric center of the triangle
-	// Function returns the geometric center of four nodes
-	glm::vec3 face_center(0);
-
-	face_center += tri->edge1->start_pt->pt_coord();
-	face_center += tri->edge2->start_pt->pt_coord();
-	face_center += tri->edge3->start_pt->pt_coord();
-	
-	face_center =  face_center / 3.0f;
-
 	point_store* pt1 = new point_store;
-	pt1->x_coord = face_center.x;
-	pt1->y_coord = face_center.y;
-	pt1->z_coord = face_center.z;
+	pt1->x_coord = tri->geom_center.x;
+	pt1->y_coord = tri->geom_center.y;
+	pt1->z_coord = tri->geom_center.z;
 
+	// Get the face normal of the triangle
 	point_store* pt2 = new point_store;
-	pt2->x_coord = face_center.x + 10.0 * tri->face_normal.x;
-	pt2->y_coord = face_center.y + 10.0 * tri->face_normal.y;
-	pt2->z_coord = face_center.z + 10.0 * tri->face_normal.z;
+	pt2->x_coord = tri->geom_center.x + 10.0 * tri->face_normal.x;
+	pt2->y_coord = tri->geom_center.y + 10.0 * tri->face_normal.y;
+	pt2->z_coord = tri->geom_center.z + 10.0 * tri->face_normal.z;
 
 	int normal_id = mesh_normals.line_count;
 	mesh_normals.add_line(normal_id, pt1, pt2, tri->face_normal);
+
+}
+
+
+void dcel_mesh_data::set_mesh_normal(quad_store* quad)
+{
+	// Get the geometric center of the triangle
+	point_store* pt1 = new point_store;
+	pt1->x_coord = quad->geom_center.x;
+	pt1->y_coord = quad->geom_center.y;
+	pt1->z_coord = quad->geom_center.z;
+
+	// Get the face normal of the triangle
+	point_store* pt2 = new point_store;
+	pt2->x_coord = quad->geom_center.x + 10.0 * quad->face_normal.x;
+	pt2->y_coord = quad->geom_center.y + 10.0 * quad->face_normal.y;
+	pt2->z_coord = quad->geom_center.z + 10.0 * quad->face_normal.z;
+
+	int normal_id = mesh_normals.line_count;
+	mesh_normals.add_line(normal_id, pt1, pt2, quad->face_normal);
 
 }
 
@@ -297,8 +345,8 @@ void dcel_mesh_data::clear_mesh()
 
 	// Mesh data
 	element_tris.clear_triangles();
-	element_quads123.clear_triangles(); 
-	element_quads341.clear_triangles(); 
+	element_quads.clear_quadrilaterals(); 
+
 
 }
 
@@ -309,8 +357,7 @@ void dcel_mesh_data::set_buffer()
 	mesh_normals.set_buffer();
 	mesh_boundaries.set_buffer();
 	element_tris.set_buffer();
-	element_quads123.set_buffer(); 
-	element_quads341.set_buffer(); 
+	element_quads.set_buffer(); 
 
 }
 
@@ -352,8 +399,7 @@ void dcel_mesh_data::paint_triangles()
 void dcel_mesh_data::paint_quadrilaterals()
 {
 	// Paint the quadrilaterals
-	element_quads123.paint_triangles(); // Triangle with edge 123
-	element_quads341.paint_triangles(); // Triangle with edge 341
+	element_quads.paint_quadrilaterals();
 
 }
 
@@ -367,7 +413,6 @@ void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	element_quads123.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	element_quads341.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	element_quads.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 
 }

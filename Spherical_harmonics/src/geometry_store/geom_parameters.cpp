@@ -200,6 +200,20 @@ glm::vec3 geom_parameters::findGeometricCenter(const std::vector<glm::vec3>& all
 	return sum / static_cast<float>(all_pts.size());
 }
 
+
+glm::vec3 geom_parameters::findGeometricCenter(const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3)
+{
+	// Function returns the geometric center of four nodes
+	glm::vec3 sum(0);
+
+	sum += pt1;
+	sum += pt2;
+	sum += pt3;
+
+	return sum / 3.0f;
+}
+
+
 glm::vec3 geom_parameters::findGeometricCenter(const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4)
 {
 	// Function returns the geometric center of four nodes
@@ -444,6 +458,30 @@ glm::vec3 geom_parameters::get_face_normal(const glm::vec3& pt1, const glm::vec3
 	return glm::normalize(normal); // Return the normal
 
 }
+
+
+
+glm::vec3 geom_parameters::get_face_normal(const glm::vec3& pt1, const glm::vec3& pt2, const glm::vec3& pt3, const glm::vec3& pt4)
+{
+	// Calculate two vectors representing two sides of the triangle
+	glm::vec3 edge1 = pt2 - pt1;
+	glm::vec3 edge2 = pt3 - pt1;
+
+	// Calculate the cross product of the two edges
+	glm::vec3 normal_face1 = glm::cross(edge1, edge2);
+
+	// Calculate two vectors representing other two sides of the triangle
+	glm::vec3 edge3 = pt4 - pt3;
+	glm::vec3 edge4 = pt1 - pt3;
+
+	// Calculate the cross product of the two edges
+	glm::vec3 normal_face2 = glm::cross(edge3, edge4);
+
+
+	return glm::normalize(normal_face1 + normal_face2); // Return the normal
+
+}
+
 
 
 //// Stop watch

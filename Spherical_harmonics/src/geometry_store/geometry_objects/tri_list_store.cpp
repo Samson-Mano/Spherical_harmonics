@@ -15,7 +15,7 @@ void tri_list_store::init(geom_parameters* geom_param_ptr)
 	// Set the geometry parameters
 	this->geom_param_ptr = geom_param_ptr;
 
-	// Create the point shader
+	// Create the triangle shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
 	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
@@ -42,13 +42,17 @@ void tri_list_store::add_tri(const int& tri_id, line_store* edge1, line_store* e
 		edge2->start_pt->pt_coord(),
 		edge3->start_pt->pt_coord());
 
+	// Find the geometric center of the face
+	temp_tri->geom_center = geom_param_ptr->findGeometricCenter(edge1->start_pt->pt_coord(),
+		edge2->start_pt->pt_coord(),
+		edge3->start_pt->pt_coord());
 
 	triMap.push_back(temp_tri);
 
 	// Add to the tri id map
 	triId_Map.insert({ tri_id, tri_count });
 
-	// Iterate the point count
+	// Iterate the triangle count
 	tri_count++;
 }
 

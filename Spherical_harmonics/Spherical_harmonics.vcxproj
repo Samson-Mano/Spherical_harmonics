@@ -173,6 +173,7 @@
     <ClCompile Include="src\geometry_store\geometry_objects\label_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\line_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\point_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\quad_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\tri_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geom_parameters.cpp" />
     <ClCompile Include="src\geometry_store\geom_store.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="src\geometry_store\geometry_objects\label_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\line_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\point_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\quad_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\tri_list_store.h" />
     <ClInclude Include="src\geometry_store\geom_parameters.h" />
     <ClInclude Include="src\geometry_store\geom_store.h" />
