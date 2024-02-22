@@ -74,7 +74,7 @@ void point_list_store::set_buffer()
 	for (auto& pt : pointMap)
 	{
 		// Add points buffers
-		get_node_buffer(pt, point_vertices, point_v_index, point_vertex_indices, point_i_index);
+		get_point_buffer(pt, point_vertices, point_v_index, point_vertex_indices, point_i_index);
 	}
 
 	VertexBufferLayout node_layout;
@@ -148,7 +148,7 @@ void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pan
 	}
 }
 
-void point_list_store::get_node_buffer(point_store& pt, float* point_vertices, unsigned int& point_v_index, unsigned int* point_indices, unsigned int& point_i_index)
+void point_list_store::get_point_buffer(point_store& pt, float* point_vertices, unsigned int& point_v_index, unsigned int* point_indices, unsigned int& point_i_index)
 {
 	// Get the node buffer for the shader
 	// Point location

@@ -27,7 +27,8 @@ void quad_list_store::init(geom_parameters* geom_param_ptr)
 	clear_quadrilaterals();
 }
 
-void quad_list_store::add_quad(const int& quad_id, line_store* edge1, line_store* edge2, line_store* edge3, line_store* edge4)
+void quad_list_store::add_quad(const int& quad_id, line_store* edge1, line_store* edge2,
+	line_store* edge3, line_store* edge4)
 {
 	// Add to the list
 	quad_store* temp_quad = new quad_store;

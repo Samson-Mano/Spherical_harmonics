@@ -3,6 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <unordered_set>
 #include <sstream>
 #include <vector>

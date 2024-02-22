@@ -18,15 +18,15 @@ void dynamic_point_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	dyn_point_shader.create_shader((shadersPath.string() + "/resources/shaders/dyntripoint_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/dyntripoint_frag_shader.frag").c_str());
+	dyn_point_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_dynvert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_dynfrag_shader.frag").c_str());
 
 	// Delete all the labels
 	dyn_point_count = 0;
 	dyn_pointMap.clear();
 }
 
-void dynamic_point_list_store::add_point(int& point_id, const glm::vec3& point_loc, const std::vector<glm::vec3>& point_offset, 
+void dynamic_point_list_store::add_point(const int& point_id, const glm::vec3& point_loc, const std::vector<glm::vec3>& point_offset, 
 	const std::vector<double>& point_offset_mag)
 {
 	dynamic_point_store dyn_temp_pt;
@@ -39,8 +39,30 @@ void dynamic_point_list_store::add_point(int& point_id, const glm::vec3& point_l
 	// Add to the list
 	dyn_pointMap.push_back(dyn_temp_pt);
 
+	// Add to the point id map
+	dyn_pointId_Map.insert({ point_id, dyn_point_count });
+
 	// Iterate the point count
 	dyn_point_count++;
+}
+
+
+dynamic_point_store* dynamic_point_list_store::get_point(const int& point_id)
+{
+	// Check whether point_id exists?
+	auto it = dyn_pointId_Map.find(point_id);
+
+	if (it != dyn_pointId_Map.end())
+	{
+		// Point id exists
+		// return the address of the point
+		return &dyn_pointMap[it->second];
+	}
+	else
+	{
+		// id not found
+		return nullptr;
+	}
 }
 
 void dynamic_point_list_store::set_buffer()

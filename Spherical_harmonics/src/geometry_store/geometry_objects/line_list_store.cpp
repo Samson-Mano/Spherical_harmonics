@@ -35,7 +35,7 @@ void line_list_store::add_line(const int& line_id, point_store* start_pt, point_
 	// Add to the line id map
 	lineId_Map.insert({ line_id, line_count });
 
-	// Iterate the point count
+	// Iterate the line count
 	line_count++;
 }
 

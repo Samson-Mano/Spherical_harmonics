@@ -17,7 +17,7 @@ void options_window::init()
 	is_show_inlcondition = true; // show initial condition
 
 	// Model Nodes
-	is_show_modelnodes = true; // Show model nodes
+	is_show_modelnodes = false; // Show model nodes
 
 	// Model elements
 	is_show_modeledeges = true; // Show model edges

@@ -36,25 +36,12 @@ public:
 
 	modal_elementtri_list_store();
 	~modal_elementtri_list_store();
-	void init(geom_parameters* geom_param_ptr);
+	void init(geom_parameters* geom_param_ptr, dcel_dynmesh_data* mesh_data);
 	void add_modal_elementtriangle(int& tri_id, modal_node_store* nd1, modal_node_store* nd2,
 		modal_node_store* nd3);
 
-	void clear_data();
-	void set_buffer();
-	void update_buffer(int selected_mode);
-	void paint_modal_elementtriangles();
-	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 private:
 	geom_parameters* geom_param_ptr = nullptr;
-	// Anti clockwise
-	//   2____3
-	//   |	 /
-	//   |	/
-	//   | /			     
-	//   1
-
-	dynamic_tri_list_store modal_element_tris; // Tri
+	dcel_dynmesh_data* mesh_data = nullptr;
 
 };

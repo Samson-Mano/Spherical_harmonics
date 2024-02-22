@@ -43,30 +43,13 @@ public:
 
 	modal_elementquad_list_store();
 	~modal_elementquad_list_store();
-	void init(geom_parameters* geom_param_ptr);
+	void init(geom_parameters* geom_param_ptr, dcel_dynmesh_data* mesh_data);
 	void add_modal_elementquadrilateral(int& quad_id, modal_node_store* nd1, modal_node_store* nd2,
 		modal_node_store* nd3, modal_node_store* nd4, glm::vec3& midpt, std::vector<glm::vec3>& midpt_modal_displ,
 		std::vector<double>& midpt_modal_displ_mag);
 
-	void clear_data();
-	void set_buffer();
-	void update_buffer(int selected_mode);
-	void paint_modal_elementquadrilaterals();
-	void update_geometry_matrices(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 private:
 	geom_parameters* geom_param_ptr = nullptr;
-	// Anti clockwise
-	//   4___________3		
-	//   |		     |     
-	//   |	   m	 |
-	//   |			 |    
-	//   1___________2        
-
-	dynamic_tri_list_store modal_element_tris1m2; // Tri 1m2
-	dynamic_tri_list_store modal_element_tris2m3; // Tri 2m3
-	dynamic_tri_list_store modal_element_tris3m4; // Tri 3m4
-	dynamic_tri_list_store modal_element_tris4m1; // Tri 4m1
-
+	dcel_dynmesh_data* mesh_data = nullptr;
 
 };

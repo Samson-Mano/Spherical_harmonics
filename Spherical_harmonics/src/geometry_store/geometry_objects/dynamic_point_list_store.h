@@ -2,13 +2,16 @@
 #include "../geometry_buffers/gBuffers.h"
 #include "../geom_parameters.h"
 
+struct dynamic_tri_store; // Forward declaration
+
 struct dynamic_point_store
 {
 	// store the individual point
 	int point_id = 0;
-	glm::vec3 point_loc = glm::vec3(0);
+	glm::vec3 point_loc;
 	std::vector<glm::vec3> point_offset; // Dynamic point offset
 	std::vector<double> point_offset_mag; // Dynamic point offset values
+
 };
 
 class dynamic_point_list_store
@@ -16,13 +19,17 @@ class dynamic_point_list_store
 public:
 	geom_parameters* geom_param_ptr = nullptr;
 	unsigned int dyn_point_count = 0;
+	std::unordered_map<int, int> dyn_pointId_Map;
 	std::vector<dynamic_point_store> dyn_pointMap;
 
 	dynamic_point_list_store();
 	~dynamic_point_list_store();
+
 	void init(geom_parameters* geom_param_ptr);
-	void add_point(int& point_id,const glm::vec3& point_loc,const std::vector<glm::vec3>& point_offset,
+	void add_point(const int& point_id,const glm::vec3& point_loc,const std::vector<glm::vec3>& point_offset,
 		const std::vector<double>& point_offset_mag);
+	dynamic_point_store* get_point(const int& point_id);
+
 	void set_buffer();
 	void paint_points();
 	void paint_points(const int& dyn_index);

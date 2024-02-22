@@ -19,45 +19,59 @@ void dynamic_tri_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	dyn_tri_shader.create_shader((shadersPath.string() + "/resources/shaders/dyntripoint_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/dyntripoint_frag_shader.frag").c_str());
+	dyn_tri_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_dynvert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_dynfrag_shader.frag").c_str());
 
 	// Delete all the triangles
-	dyn_tri_count = 0;
-	dyn_triMap.clear();
+	clear_triangles();
 
 }
 
 
-void dynamic_tri_list_store::add_tri(int& tri_id, const glm::vec3& tript1_loc, const glm::vec3& tript2_loc, const glm::vec3& tript3_loc,
-	const std::vector<glm::vec3>& tript1_offset, const std::vector<glm::vec3>& tript2_offset, const std::vector<glm::vec3>& tript3_offset,
-	const std::vector<double>& tript1_offset_mag, const std::vector<double>& tript2_offset_mag, const std::vector<double>& tript3_offset_mag)
+void dynamic_tri_list_store::add_tri(const int& tri_id, dynamic_line_store* edge1,
+	dynamic_line_store* edge2,	dynamic_line_store* edge3)
 {
-	// Create a temporary lines
-	dynamic_tri_store dyn_temp_tri;
-	dyn_temp_tri.tri_id = tri_id;
+	// Create a temporary triangle
+	// Add to the list
+	dynamic_tri_store* dyn_temp_tri = new dynamic_tri_store;
 
-	// Tri points
-	dyn_temp_tri.tript1_loc = tript1_loc;
-	dyn_temp_tri.tript2_loc = tript2_loc;
-	dyn_temp_tri.tript3_loc = tript3_loc;
+	dyn_temp_tri->tri_id = tri_id;
+	dyn_temp_tri->edge1 = edge1;
+	dyn_temp_tri->edge2 = edge2;
+	dyn_temp_tri->edge3 = edge3;
 
-	// Tri offsets
-	dyn_temp_tri.tript1_offset = tript1_offset;
-	dyn_temp_tri.tript2_offset = tript2_offset;
-	dyn_temp_tri.tript3_offset = tript3_offset;
 
-	// Tri offset values
-	dyn_temp_tri.tript1_offset_val = tript1_offset_mag;
-	dyn_temp_tri.tript2_offset_val = tript2_offset_mag;
-	dyn_temp_tri.tript3_offset_val = tript3_offset_mag;
+	// Set the face normal
+
 
 	//___________________________________________________________________
 	// Add to the list
 	dyn_triMap.push_back(dyn_temp_tri);
 
+	// Add to the tri id map
+	dyn_triId_Map.insert({ tri_id, dyn_tri_count });
+
 	// Iterate the tri count
 	dyn_tri_count++;
+}
+
+dynamic_tri_store* dynamic_tri_list_store::get_triangle(const int& dyn_tri_id)
+{
+	// Check whether tri_id exists?
+	auto it = dyn_triId_Map.find(dyn_tri_id);
+
+	if (it != dyn_triId_Map.end())
+	{
+		// tri id exists
+		// return the address of the triangle
+		return dyn_triMap[it->second];
+	}
+	else
+	{
+		// id not found
+		return nullptr;
+	}
+
 }
 
 
@@ -140,7 +154,7 @@ void dynamic_tri_list_store::update_buffer(const int& dyn_index)
 		get_tri_vertex_buffer(tri, dyn_index, tri_vertices, tri_v_index);
 	}
 
-	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the line point vertex
+	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the tri point vertex
 
 	// Update the buffer
 	dyn_tri_buffer.UpdateDynamicVertexBuffer(tri_vertices, tri_vertex_size);
@@ -154,6 +168,7 @@ void dynamic_tri_list_store::clear_triangles()
 {
 	// Delete all the triangles
 	dyn_tri_count = 0;
+	dyn_triId_Map.clear();
 	dyn_triMap.clear();
 
 }
@@ -204,40 +219,40 @@ void dynamic_tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool s
 
 }
 
-void dynamic_tri_list_store::get_tri_vertex_buffer(dynamic_tri_store& tri, const int& dyn_index,
+void dynamic_tri_list_store::get_tri_vertex_buffer(dynamic_tri_store* tri, const int& dyn_index,
 	float* dyn_tri_vertices, unsigned int& dyn_tri_v_index)
 {
 	// Get the node buffer for the shader
 	// Tri Point 1
 	// Point location
-	dyn_tri_vertices[dyn_tri_v_index + 0] = tri.tript1_loc.x;
-	dyn_tri_vertices[dyn_tri_v_index + 1] = tri.tript1_loc.y;
-	dyn_tri_vertices[dyn_tri_v_index + 2] = tri.tript1_loc.z;
+	dyn_tri_vertices[dyn_tri_v_index + 0] = tri->edge1->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge1->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge1->start_pt->point_loc.z;
 
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri.tript1_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri.tript1_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri.tript1_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge1->start_pt->point_offset[dyn_index].z;
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri.tript1_offset_val[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge1->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
 	dyn_tri_v_index = dyn_tri_v_index + 7;
 
 	// Tri Point 2
 	// Point location
-	dyn_tri_vertices[dyn_tri_v_index + 0] = tri.tript2_loc.x;
-	dyn_tri_vertices[dyn_tri_v_index + 1] = tri.tript2_loc.y;
-	dyn_tri_vertices[dyn_tri_v_index + 2] = tri.tript2_loc.z;
+	dyn_tri_vertices[dyn_tri_v_index + 0] = tri->edge2->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge2->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge2->start_pt->point_loc.z;
 
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri.tript2_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri.tript2_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri.tript2_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge2->start_pt->point_offset[dyn_index].z;
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri.tript2_offset_val[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge2->start_pt->point_offset_mag[dyn_index];
 	
 	// Iterate
 	dyn_tri_v_index = dyn_tri_v_index + 7;
@@ -245,17 +260,17 @@ void dynamic_tri_list_store::get_tri_vertex_buffer(dynamic_tri_store& tri, const
 
 	// Tri Point 3
 	// Point location
-	dyn_tri_vertices[dyn_tri_v_index + 0] = tri.tript3_loc.x;
-	dyn_tri_vertices[dyn_tri_v_index + 1] = tri.tript3_loc.y;
-	dyn_tri_vertices[dyn_tri_v_index + 2] = tri.tript3_loc.z;
+	dyn_tri_vertices[dyn_tri_v_index + 0] = tri->edge3->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge3->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge3->start_pt->point_loc.z;
 
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri.tript3_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri.tript3_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri.tript3_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge3->start_pt->point_offset[dyn_index].z;
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri.tript3_offset_val[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge3->start_pt->point_offset_mag[dyn_index];
 	
 	// Iterate
 	dyn_tri_v_index = dyn_tri_v_index + 7;

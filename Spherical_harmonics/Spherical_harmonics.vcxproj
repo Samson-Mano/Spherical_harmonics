@@ -165,9 +165,11 @@
     <ClCompile Include="src\geometry_store\geometry_buffers\VertexArray.cpp" />
     <ClCompile Include="src\geometry_store\geometry_buffers\VertexBuffer.cpp" />
     <ClCompile Include="src\geometry_store\geometry_buffers\VertexBufferLayout.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\dcel_dynmesh_data.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dcel_mesh_data.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_line_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_point_list_store.cpp" />
+    <ClCompile Include="src\geometry_store\geometry_objects\dynamic_quad_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_selrectangle_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_tri_list_store.cpp" />
     <ClCompile Include="src\geometry_store\geometry_objects\label_list_store.cpp" />
@@ -211,6 +213,8 @@
     <None Include="resources\shaders\dyntripoint_vert_shader.vert" />
     <None Include="resources\shaders\load_frag_shader.frag" />
     <None Include="resources\shaders\load_vert_shader.vert" />
+    <None Include="resources\shaders\mesh_dynfrag_shader.frag" />
+    <None Include="resources\shaders\mesh_dynvert_shader.vert" />
     <None Include="resources\shaders\mesh_frag_shader.frag" />
     <None Include="resources\shaders\mesh_vert_shader.vert" />
     <None Include="resources\shaders\point_frag_shader.frag" />
@@ -252,9 +256,11 @@
     <ClInclude Include="src\geometry_store\geometry_buffers\VertexArray.h" />
     <ClInclude Include="src\geometry_store\geometry_buffers\VertexBuffer.h" />
     <ClInclude Include="src\geometry_store\geometry_buffers\VertexBufferLayout.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\dcel_dynmesh_data.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dcel_mesh_data.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_line_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_point_list_store.h" />
+    <ClInclude Include="src\geometry_store\geometry_objects\dynamic_quad_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_selrectangle_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_tri_list_store.h" />
     <ClInclude Include="src\geometry_store\geometry_objects\label_list_store.h" />

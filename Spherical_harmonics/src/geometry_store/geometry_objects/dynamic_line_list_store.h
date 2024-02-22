@@ -1,21 +1,20 @@
 #pragma once
-#include "../geometry_buffers/gBuffers.h"
-#include "../geom_parameters.h"
+#include "dynamic_point_list_store.h"
+
 
 struct dynamic_line_store
 {
 	// store the individual point
-	int line_id = 0;
-	glm::vec3 line_startpt_loc = glm::vec3(0);
-	glm::vec3 line_endpt_loc = glm::vec3(0);
+	int line_id = -1;
+		
+	dynamic_point_store* start_pt = nullptr;
+	dynamic_point_store* end_pt = nullptr;
+	dynamic_line_store* next_line = nullptr;        // Next half-edge in the same face
+	dynamic_line_store* twin_line = nullptr;        // Opposite half-edge
+	dynamic_tri_store* face = nullptr;    // Face to the left of this half-edge
 
-	std::vector<glm::vec3> line_startpt_offset; // list of start points offset
-	std::vector<glm::vec3> line_endpt_offset; // list of end points offset
+	std::vector<glm::vec3> line_normal; // Normal of the edge (It is based on the two faces its attached to)
 
-	std::vector<double> line_startpt_offset_val;
-	std::vector<double> line_endpt_offset_val;
-
-	int offset_pt_count = 0;
 };
 
 class dynamic_line_list_store
@@ -23,14 +22,16 @@ class dynamic_line_list_store
 public:
 	geom_parameters* geom_param_ptr = nullptr;
 	unsigned int dyn_line_count = 0;
+	std::unordered_map<int, int> dyn_lineId_Map;
 	std::vector<dynamic_line_store> dyn_lineMap;
 
 	dynamic_line_list_store();
 	~dynamic_line_list_store();
 	void init(geom_parameters* geom_param_ptr);
-	void add_line(int& line_id, const glm::vec3& line_startpt_loc,const glm::vec3& line_endpt_loc,
-		const std::vector<glm::vec3>& line_startpt_offset,const std::vector<glm::vec3>& line_endpt_offset,
-		const std::vector<double>& line_startpt_offset_mag,const std::vector<double>& line_endpt_offset_mag);
+	void add_line(const int& line_id, dynamic_point_store* start_pt,
+		dynamic_point_store* end_pt, const std::vector<glm::vec3>& line_normal);
+	dynamic_line_store* get_line(const int& dyn_line_id);
+
 	void set_buffer();
 	void paint_lines();
 	void paint_lines(const int& dyn_index);

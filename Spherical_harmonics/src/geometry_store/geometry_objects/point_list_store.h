@@ -42,7 +42,7 @@ private:
 	gBuffers point_buffer;
 	Shader point_shader;
 
-	void get_node_buffer(point_store& pt,float* point_vertices, unsigned int& point_v_index, unsigned int* point_indices, unsigned int& point_i_index);
+	void get_point_buffer(point_store& pt,float* point_vertices, unsigned int& point_v_index, unsigned int* point_indices, unsigned int& point_i_index);
 };
 
 

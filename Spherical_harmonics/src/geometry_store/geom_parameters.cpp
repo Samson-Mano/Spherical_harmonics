@@ -53,7 +53,7 @@ void geom_parameters::init()
 	// Camera position is (-1, 0, 0) (offset to the left)
 
 	// Example view matrix (camera transformation)
-	glm::vec3 cameraPosition(-1.0f, 0.0f, 0.0f); // Camera position
+	glm::vec3 cameraPosition(0.0f, 0.0f, 1.0f); // Camera position
 	glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);    // Camera target (where it's looking)
 	glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);        // Up vector
 

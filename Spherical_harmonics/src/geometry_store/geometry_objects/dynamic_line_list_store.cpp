@@ -18,8 +18,8 @@ void dynamic_line_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	dyn_line_shader.create_shader((shadersPath.string() + "/resources/shaders/dyntripoint_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/dyntripoint_frag_shader.frag").c_str());
+	dyn_line_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_dynvert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_dynfrag_shader.frag").c_str());
 
 	// Delete all the lines
 	dyn_line_count = 0;
@@ -27,33 +27,35 @@ void dynamic_line_list_store::init(geom_parameters* geom_param_ptr)
 }
 
 
-void dynamic_line_list_store::add_line(int& line_id, 
-	const glm::vec3& line_startpt_loc, const glm::vec3& line_endpt_loc,
-	const std::vector<glm::vec3>& line_startpt_offset, const std::vector<glm::vec3>& line_endpt_offset,
-	const std::vector<double>& line_startpt_offset_mag, const std::vector<double>& line_endpt_offset_mag)
+void dynamic_line_list_store::add_line(const int& line_id, dynamic_point_store* start_pt,
+	dynamic_point_store* end_pt, const std::vector<glm::vec3>& line_normal)
 {
-	// Create a temporary lines
-	dynamic_line_store dyn_temp_ln;
-	dyn_temp_ln.line_id = line_id;
-
-	// Line points
-	dyn_temp_ln.line_startpt_loc = line_startpt_loc;
-	dyn_temp_ln.line_endpt_loc = line_endpt_loc;
-
-	// Line offsets
-	dyn_temp_ln.line_startpt_offset = line_startpt_offset;
-	dyn_temp_ln.line_endpt_offset = line_endpt_offset;
-
-	// Line offset values
-	dyn_temp_ln.line_startpt_offset_val = line_startpt_offset_mag;
-	dyn_temp_ln.line_endpt_offset_val = line_endpt_offset_mag;
-
-	//___________________________________________________________________
 	// Add to the list
-	dyn_lineMap.push_back(dyn_temp_ln);
+	dyn_lineMap.push_back({ line_id, start_pt,end_pt, nullptr,nullptr,nullptr, line_normal });
+
+	// Add to the line id map
+	dyn_lineId_Map.insert({ line_id, dyn_line_count });
 
 	// Iterate the line count
 	dyn_line_count++;
+}
+
+dynamic_line_store* dynamic_line_list_store::get_line(const int& dyn_line_id)
+{
+	// Check whether line_id exists?
+	auto it = dyn_lineId_Map.find(dyn_line_id);
+
+	if (it != dyn_lineId_Map.end())
+	{
+		// return the address of the line
+		// line id exists
+		return &dyn_lineMap[it->second];
+	}
+	else
+	{
+		// id not found
+		return nullptr;
+	}
 }
 
 void dynamic_line_list_store::set_buffer()
@@ -196,34 +198,34 @@ void dynamic_line_list_store::get_line_vertex_buffer(dynamic_line_store& ln, con
 	// Get the node buffer for the shader
 	// Start Point
 	// Point location
-	dyn_line_vertices[dyn_line_v_index + 0] = ln.line_startpt_loc.x;
-	dyn_line_vertices[dyn_line_v_index + 1] = ln.line_startpt_loc.y;
-	dyn_line_vertices[dyn_line_v_index + 2] = ln.line_startpt_loc.z;
+	dyn_line_vertices[dyn_line_v_index + 0] = ln.start_pt->point_loc.x;
+	dyn_line_vertices[dyn_line_v_index + 1] = ln.start_pt->point_loc.y;
+	dyn_line_vertices[dyn_line_v_index + 2] = ln.start_pt->point_loc.z;
 
 	// Point offset
-	dyn_line_vertices[dyn_line_v_index + 3] = ln.line_startpt_offset[dyn_index].x;
-	dyn_line_vertices[dyn_line_v_index + 4] = ln.line_startpt_offset[dyn_index].y;
-	dyn_line_vertices[dyn_line_v_index + 5] = ln.line_startpt_offset[dyn_index].z;
+	dyn_line_vertices[dyn_line_v_index + 3] = ln.start_pt->point_offset[dyn_index].x;
+	dyn_line_vertices[dyn_line_v_index + 4] = ln.start_pt->point_offset[dyn_index].y;
+	dyn_line_vertices[dyn_line_v_index + 5] = ln.start_pt->point_offset[dyn_index].z;
 
 	// Normalized offset length
-	dyn_line_vertices[dyn_line_v_index + 6] = ln.line_startpt_offset_val[dyn_index];
+	dyn_line_vertices[dyn_line_v_index + 6] = ln.start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
 	dyn_line_v_index = dyn_line_v_index + 7;
 
 	// End Point
 	// Point location
-	dyn_line_vertices[dyn_line_v_index + 0] = ln.line_endpt_loc.x;
-	dyn_line_vertices[dyn_line_v_index + 1] = ln.line_endpt_loc.y;
-	dyn_line_vertices[dyn_line_v_index + 2] = ln.line_endpt_loc.z;
+	dyn_line_vertices[dyn_line_v_index + 0] = ln.end_pt->point_loc.x;
+	dyn_line_vertices[dyn_line_v_index + 1] = ln.end_pt->point_loc.y;
+	dyn_line_vertices[dyn_line_v_index + 2] = ln.end_pt->point_loc.z;
 
 	// Point offset
-	dyn_line_vertices[dyn_line_v_index + 3] = ln.line_endpt_offset[dyn_index].x;
-	dyn_line_vertices[dyn_line_v_index + 4] = ln.line_endpt_offset[dyn_index].y;
-	dyn_line_vertices[dyn_line_v_index + 5] = ln.line_endpt_offset[dyn_index].z;
+	dyn_line_vertices[dyn_line_v_index + 3] = ln.end_pt->point_offset[dyn_index].x;
+	dyn_line_vertices[dyn_line_v_index + 4] = ln.end_pt->point_offset[dyn_index].y;
+	dyn_line_vertices[dyn_line_v_index + 5] = ln.end_pt->point_offset[dyn_index].z;
 
 	// Normalized offset length
-	dyn_line_vertices[dyn_line_v_index + 6] = ln.line_endpt_offset_val[dyn_index];
+	dyn_line_vertices[dyn_line_v_index + 6] = ln.end_pt->point_offset_mag[dyn_index];
 
 	// Iterate
 	dyn_line_v_index = dyn_line_v_index + 7;
