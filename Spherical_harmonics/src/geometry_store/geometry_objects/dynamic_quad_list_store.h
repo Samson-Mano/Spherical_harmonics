@@ -36,7 +36,6 @@ public:
 
 	void set_buffer();
 	void paint_quadrilaterals();
-	void paint_quadrilaterals(const int& dyn_index);
 	void update_buffer(const int& dyn_index);
 	void clear_quadrilaterals();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,

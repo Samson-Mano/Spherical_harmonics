@@ -41,12 +41,12 @@ void dcel_dynmesh_data::add_mesh_point(const int& point_id, const glm::vec3 poin
 void dcel_dynmesh_data::add_mesh_triangle(const int& tri_id, const int& point_id1, const int& point_id2, const int& point_id3)
 {
 	//    2____3 
-//    |   /  
-//    | /    
-//    1      
+	//    |   /  
+	//    | /    
+	//    1      
 
-// Add the half triangle of the quadrilaterals
-// Add three half edges
+	// Add the half triangle of the quadrilaterals
+	// Add three half edges
 	int line_id1, line_id2, line_id3;
 
 	// Add edge 1
@@ -286,6 +286,17 @@ void dcel_dynmesh_data::paint_quadrilaterals()
 {
 	// Paint the quadrilaterals
 	element_quads.paint_quadrilaterals();
+
+}
+
+void dcel_dynmesh_data::update_buffer(const int& draw_step)
+{
+	// Update the Dynamic vertex buffer of the drawing object based on the draw step
+	node_points.update_buffer(draw_step);
+	mesh_normals.update_buffer(draw_step);
+	mesh_boundaries.update_buffer(draw_step);
+	element_tris.update_buffer(draw_step);
+	element_quads.update_buffer(draw_step);
 
 }
 

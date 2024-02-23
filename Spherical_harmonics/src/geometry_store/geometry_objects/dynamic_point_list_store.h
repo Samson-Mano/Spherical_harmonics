@@ -32,7 +32,6 @@ public:
 
 	void set_buffer();
 	void paint_points();
-	void paint_points(const int& dyn_index);
 	void update_buffer(const int& dyn_index);
 	void clear_points();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,

@@ -9,10 +9,10 @@
 #include "../geometry_store/fe_objects/elementquad_list_store.h"
 
 // FE Results Modal Analysis
-#include "../geometry_store/result_objects/modal_nodes_list_store.h"
-#include "../geometry_store/result_objects/modal_elementline_list_store.h"
-#include "../geometry_store/result_objects/modal_elementtri_list_store.h"
-#include "../geometry_store/result_objects/modal_elementquad_list_store.h"
+#include "../geometry_store/result_objects/rslt_nodes_list_store.h"
+#include "../geometry_store/result_objects/rslt_elementline_list_store.h"
+#include "../geometry_store/result_objects/rslt_elementtri_list_store.h"
+#include "../geometry_store/result_objects/rslt_elementquad_list_store.h"
 
 // Stop watch
 #include "../events_handler/Stopwatch_events.h"
@@ -79,7 +79,6 @@ class modal_analysis_solver
 {
 public:
 	// Result store
-	std::unordered_map<int, bool> constrained_node_map; // Node ID and Bool True = Constrained, False = Un Constrained
 	std::unordered_map<int, int> nodeid_map; // Node ID map for eigen vectors
 	int paint_mode_count = 100; // Draw only first 100 modes (To save memory)
 	int number_of_modes = 0;
@@ -103,14 +102,12 @@ public:
 	void clear_results();
 
 	void modal_analysis_start(const nodes_list_store& model_nodes,
-		const elementline_list_store& model_lineelements,
 		const elementtri_list_store& model_trielements,
 		const elementquad_list_store& model_quadelements,
 		const material_data& mat_data,
-		modal_nodes_list_store& modal_result_nodes,
-		modal_elementline_list_store& modal_result_lineelements,
-		modal_elementtri_list_store& modal_result_trielements,
-		modal_elementquad_list_store& modal_result_quadelements);
+		rslt_nodes_list_store& modal_result_nodes,
+		rslt_elementtri_list_store& modal_result_trielements,
+		rslt_elementquad_list_store& modal_result_quadelements);
 private:
 	const double m_pi = 3.14159265358979323846;
 	const double epsilon = 0.000001;
@@ -119,30 +116,5 @@ private:
 	std::stringstream stopwatch_elapsed_str;
 
 	std::vector<bessel_function_Frequency> eigen_freq;
-
-	void modal_analysis_model_circular(const nodes_list_store& model_nodes,
-		const elementline_list_store& model_lineelements,
-		const elementtri_list_store& model_trielements,
-		const elementquad_list_store& model_quadelements,
-		const material_data& mat_data,
-		const double& c_radius,
-		modal_nodes_list_store& modal_result_nodes,
-		modal_elementline_list_store& modal_result_lineelements,
-		modal_elementtri_list_store& modal_result_trielements,
-		modal_elementquad_list_store& modal_result_quadelements);
-
-	double bessel_eigen_vec(const bessel_function_Frequency& bessel_root_i, const glm::vec3& nodept, const double& c_radius);
-
-	void modal_analysis_model_rectangular(const nodes_list_store& model_nodes,
-		const elementline_list_store& model_lineelements,
-		const elementquad_list_store& model_quadelements,
-		const material_data& mat_data,
-		const double& length_x,
-		const double& length_y,
-		modal_nodes_list_store& modal_result_nodes,
-		modal_elementline_list_store& modal_result_lineelements,
-		modal_elementquad_list_store& modal_result_quadelements);
-
-	double rect_eigen_vec(const bessel_function_Frequency& rect_freq_i, const glm::vec3& nodept, const double& length_x, const double& length_y);
 
 };

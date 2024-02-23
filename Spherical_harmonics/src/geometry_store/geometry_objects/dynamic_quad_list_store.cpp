@@ -161,19 +161,6 @@ void dynamic_quad_list_store::paint_quadrilaterals()
 
 }
 
-void dynamic_quad_list_store::paint_quadrilaterals(const int& dyn_index)
-{
-	// Paint all the Quadrilaterals
-	dyn_quad_shader.Bind();
-	dyn_quad_buffer.Bind();
-
-	// Update the tri buffer data for dynamic drawing
-	update_buffer(dyn_index);
-
-	glDrawElements(GL_TRIANGLES, (6 * dyn_quad_count), GL_UNSIGNED_INT, 0);
-	dyn_quad_buffer.UnBind();
-	dyn_quad_shader.UnBind();
-}
 
 void dynamic_quad_list_store::update_buffer(const int& dyn_index)
 {

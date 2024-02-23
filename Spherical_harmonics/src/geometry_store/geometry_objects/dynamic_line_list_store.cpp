@@ -89,20 +89,6 @@ void dynamic_line_list_store::set_buffer()
 	delete[] line_vertex_indices;
 }
 
-void dynamic_line_list_store::paint_lines(const int& dyn_index)
-{
-	// Paint all the lines
-	dyn_line_shader.Bind();
-	dyn_line_buffer.Bind();
-
-	// Update the line buffer data for dynamic drawing
-	update_buffer(dyn_index);
-
-	glDrawElements(GL_LINES, (2 * dyn_line_count), GL_UNSIGNED_INT, 0);
-	dyn_line_buffer.UnBind();
-	dyn_line_shader.UnBind();
-}
-
 void dynamic_line_list_store::paint_lines()
 {
 	// Paint all the lines

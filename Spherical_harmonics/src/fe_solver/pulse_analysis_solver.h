@@ -2,10 +2,15 @@
 #include "modal_analysis_solver.h"
 #include "../geometry_store/fe_objects/nodeload_list_store.h"
 #include "../geometry_store/fe_objects/nodeinlcond_list_store.h"
-#include "../geometry_store/result_objects/pulse_node_list_store.h"
-#include "../geometry_store/result_objects/pulse_elementline_list_store.h"
-#include "../geometry_store/result_objects/pulse_elementtri_list_store.h"
-#include "../geometry_store/result_objects/pulse_elementquad_list_store.h"
+
+
+struct pulse_node_result
+{
+	std::vector<int> at_time_step; // At time step (integer)
+	std::vector<double> time_val; // at time t list
+	std::vector<double> node_displ_magnitude; // Displacmenet magnitude at time t
+	std::vector <glm::vec3> node_displ; // Nodal  displacement at time t
+};
 
 
 struct pulse_load_data
@@ -23,7 +28,6 @@ public:
 	const double m_pi = 3.14159265358979323846;
 	const double epsilon = 0.000001;
 	bool print_matrix = false;
-	std::unordered_map<int, bool> constrained_node_map; // Node ID and Bool True = Constrained, False = Un Constrained
 	std::unordered_map<int, int> nodeid_map; // Node ID map
 	int model_type = 0;
 	int numDOF = 0;
@@ -39,7 +43,6 @@ public:
 	~pulse_analysis_solver();
 	void clear_results();
 	void pulse_analysis_start(const nodes_list_store& model_nodes,
-		const elementline_list_store& model_lineelements,
 		const elementtri_list_store& model_trielements,
 		const elementquad_list_store& model_quadelements,
 		const nodeload_list_store& node_loads,
@@ -51,10 +54,9 @@ public:
 		const double time_interval,
 		const double damping_ratio,
 		const int selected_pulse_option,
-		pulse_node_list_store& pulse_result_nodes,
-		pulse_elementline_list_store& pulse_result_lineelements,
-		pulse_elementtri_list_store& pulse_result_trielements,
-		pulse_elementquad_list_store& pulse_result_quadelements);
+		rslt_nodes_list_store& pulse_result_nodes,
+		rslt_elementtri_list_store& pulse_result_trielements,
+		rslt_elementquad_list_store& pulse_result_quadelements);
 
 private:
 	Stopwatch_events stopwatch;
@@ -123,13 +125,11 @@ private:
 		const double& modal_force_endtime);
 
 
-	void map_pulse_analysis_results(pulse_node_list_store& pulse_result_nodes,
-		pulse_elementline_list_store& pulse_result_lineelements,
-		pulse_elementtri_list_store& pulse_result_trielements,
-		pulse_elementquad_list_store& pulse_result_quadelements,
+	void map_pulse_analysis_results(rslt_nodes_list_store& pulse_result_nodes,
+		rslt_elementtri_list_store& pulse_result_trielements,
+		rslt_elementquad_list_store& pulse_result_quadelements,
 		const int& number_of_time_steps,
 		const nodes_list_store& model_nodes,
-		const elementline_list_store& model_lineelements,
 		const elementtri_list_store& model_trielements,
 		const elementquad_list_store& model_quadelements,
 		const std::unordered_map<int, pulse_node_result>& node_results);

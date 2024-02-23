@@ -93,30 +93,6 @@
     <ClCompile Include="src\tool_window\pulse_analysis_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\modal_elementline_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\modal_elementquad_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\modal_elementtri_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\modal_nodes_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\pulse_elementline_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\pulse_elementquad_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\pulse_elementtri_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\geometry_store\result_objects\pulse_node_list_store.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\geometry_store\geometry_objects\dynamic_line_list_store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -193,6 +169,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\geometry_store\geometry_objects\dcel_dynmesh_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\result_objects\rslt_nodes_list_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\result_objects\rslt_elementline_list_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\result_objects\rslt_elementtri_list_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\result_objects\rslt_elementquad_list_store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -316,30 +304,6 @@
     <ClInclude Include="src\tool_window\pulse_analysis_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\modal_elementline_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\modal_elementquad_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\modal_elementtri_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\modal_nodes_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\pulse_elementline_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\pulse_elementquad_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\pulse_elementtri_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\geometry_store\result_objects\pulse_node_list_store.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\geometry_store\geometry_objects\dynamic_line_list_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -416,6 +380,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\geometry_objects\dcel_dynmesh_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\result_objects\rslt_nodes_list_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\result_objects\rslt_elementline_list_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\result_objects\rslt_elementtri_list_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\result_objects\rslt_elementquad_list_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

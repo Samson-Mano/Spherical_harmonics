@@ -107,24 +107,6 @@ void dynamic_tri_list_store::set_buffer()
 	delete[] tri_vertex_indices;
 }
 
-
-void dynamic_tri_list_store::paint_triangles(const int& dyn_index)
-{
-	// Paint all the triangles
-	dyn_tri_shader.Bind();
-	dyn_tri_buffer.Bind();
-
-	// Update the tri buffer data for dynamic drawing
-	update_buffer(dyn_index);
-
-	glDrawElements(GL_TRIANGLES, (3 * dyn_tri_count), GL_UNSIGNED_INT, 0);
-	dyn_tri_buffer.UnBind();
-	dyn_tri_shader.UnBind();
-
-}
-
-
-
 void dynamic_tri_list_store::paint_triangles()
 {
 	// Paint all the triangles

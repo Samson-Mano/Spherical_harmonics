@@ -32,7 +32,6 @@ public:
 
 	void set_buffer();
 	void paint_triangles();
-	void paint_triangles(const int& dyn_index);
 	void update_buffer(const int& dyn_index);
 	void clear_triangles();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,

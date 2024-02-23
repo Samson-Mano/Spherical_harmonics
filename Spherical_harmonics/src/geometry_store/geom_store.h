@@ -28,20 +28,14 @@
 
 // Geometry Objects
 #include "geometry_objects/dcel_mesh_data.h"
+#include "geometry_objects/dcel_dynmesh_data.h"
 #include "geometry_objects/dynamic_selrectangle_store.h"
 
-// FE Result Objects Modal analysis
-#include "result_objects/modal_nodes_list_store.h";
-#include "result_objects/modal_elementline_list_store.h";
-#include "result_objects/modal_elementtri_list_store.h";
-#include "result_objects/modal_elementquad_list_store.h"
-
-// FE Result Objects Pulse analysis
-#include "result_objects/pulse_node_list_store.h"
-#include "result_objects/pulse_elementline_list_store.h"
-#include "result_objects/pulse_elementtri_list_store.h"
-#include "result_objects/pulse_elementquad_list_store.h"
-
+// FE Result Objects 
+#include "result_objects/rslt_nodes_list_store.h";
+#include "result_objects/rslt_elementline_list_store.h";
+#include "result_objects/rslt_elementtri_list_store.h";
+#include "result_objects/rslt_elementquad_list_store.h"
 
 class geom_store
 {
@@ -65,7 +59,6 @@ public:
 
 	// Load the geometry
 	void load_model(const int& model_type,std::vector<std::string> input_data);
-	std::vector<elementline_store> removeDuplicates(const std::vector<elementline_store>& elementline);
 
 	// Functions to control the drawing area
 	void update_WindowDimension(const int& window_width, const int& window_height);
@@ -86,10 +79,11 @@ private:
 	// geometry objects
 	dynamic_selrectangle_store selection_rectangle;
 	dcel_mesh_data mesh_data;
+	dcel_dynmesh_data mesh_modal_rslt_data;
+	dcel_dynmesh_data mesh_pulse_rslt_data;
 
 	// Mesh objects
 	nodes_list_store model_nodes;
-	elementline_list_store model_lineelements;
 	elementtri_list_store model_trielements;
 	elementquad_list_store model_quadelements;
 
@@ -102,16 +96,14 @@ private:
 	nodeinlcond_list_store node_inlvelo;
 
 	// Modal analysis result 
-	modal_nodes_list_store modal_result_nodes;
-	modal_elementline_list_store modal_result_lineelements;
-	modal_elementtri_list_store modal_result_trielements;
-	modal_elementquad_list_store modal_result_quadelements;
+	rslt_nodes_list_store modal_result_nodes;
+	rslt_elementtri_list_store modal_result_trielements;
+	rslt_elementquad_list_store modal_result_quadelements;
 
 	// Pulse analysis result
-	pulse_node_list_store pulse_result_nodes;
-	pulse_elementline_list_store pulse_result_lineelements;
-	pulse_elementtri_list_store pulse_result_trielements;
-	pulse_elementquad_list_store pulse_result_quadelements;
+	rslt_nodes_list_store pulse_result_nodes;
+	rslt_elementtri_list_store pulse_result_trielements;
+	rslt_elementquad_list_store pulse_result_quadelements;
 
 	// Solver object
 	modal_analysis_solver modal_solver;

@@ -34,7 +34,6 @@ public:
 
 	void set_buffer();
 	void paint_lines();
-	void paint_lines(const int& dyn_index);
 	void update_buffer(const int& dyn_index);
 	void clear_lines();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation, 

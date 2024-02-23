@@ -49,6 +49,8 @@ public:
 	void paint_triangles();
 	void paint_quadrilaterals();
 
+	void update_buffer(const int& draw_step);
+
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
 		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
 

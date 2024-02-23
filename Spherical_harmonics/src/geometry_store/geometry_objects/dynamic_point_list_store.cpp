@@ -97,20 +97,6 @@ void dynamic_point_list_store::set_buffer()
 	delete[] point_vertex_indices;
 }
 
-void dynamic_point_list_store::paint_points(const int& dyn_index)
-{
-	// Paint all the points
-	dyn_point_shader.Bind();
-	dyn_point_buffer.Bind();
-
-	// Update the point buffer data for dynamic drawing
-	update_buffer(dyn_index);
-
-	glDrawElements(GL_POINTS, dyn_point_count, GL_UNSIGNED_INT, 0);
-	dyn_point_buffer.UnBind();
-	dyn_point_shader.UnBind();
-}
-
 
 void dynamic_point_list_store::paint_points()
 {
