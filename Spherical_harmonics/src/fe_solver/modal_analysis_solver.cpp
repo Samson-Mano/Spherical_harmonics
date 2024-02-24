@@ -62,7 +62,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	this->node_count = model_nodes.node_count;
 	this->model_type = mat_data.model_type;
 
-	this->matrix_size = 0;
+	this->matrix_size = model_nodes.node_count;
 
 	// Clear the angular frequency matrix
 	angular_freq_vector.resize(matrix_size);
@@ -89,6 +89,8 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 		paint_mode_count = matrix_size;
 	}
 
+	// Legendre polynomial
+	set_legendre_polynomial();
 
 
 
@@ -100,3 +102,65 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 
 }
 
+
+void modal_analysis_solver::set_legendre_polynomial()
+{
+	// Set the legendre polynomial
+
+	std::ofstream output_file;
+	output_file.open("modal_analysis_results.txt");
+
+	//output_file << "Eigen vector matrix:" << std::endl;
+	//output_file << this->eigen_vectors_matrix << std::endl;
+	//output_file << std::endl;
+
+
+	output_file << "Number of nodes = " << matrix_size << std::endl;
+
+
+	// Create the associated legendre polynomial values
+	eigen_freq.clear();
+	int mode_count = 0;
+
+	for (int i = 1; i <= matrix_size; i++)
+	{
+		for (int j = -i; j < (i + 1); j++)
+		{
+			// Create the legendre polynomial
+			legendre_polynomial_function temp_p;
+			temp_p.mode_number = (mode_count + 1);
+			temp_p.l = i;
+			temp_p.m = j;
+
+			output_file << "mode number = " << (mode_count + 1) << ", l = " << i << ", m = " << j << std::endl;
+
+			// Add to the list
+			eigen_freq.push_back(temp_p);
+
+			mode_count++;
+
+			if (mode_count >= matrix_size)
+			{
+				// Exit both the for loops
+				break;
+			}
+
+		}
+
+		if (mode_count >= matrix_size)
+		{
+			// Exit both the for loops
+			break;
+		}
+	}
+
+	output_file.close();
+
+}
+
+
+double modal_analysis_solver::legendre_polynomial(const int& l_param, const int& m_param)
+{
+	return 0.0;
+
+}

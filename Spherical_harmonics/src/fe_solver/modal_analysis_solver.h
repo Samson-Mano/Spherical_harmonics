@@ -60,17 +60,16 @@ struct quad_midnode_eigenvector_store
 };
 
 
-struct bessel_function_Frequency
+struct legendre_polynomial_function
 {
 	int mode_number = 0; // mode number
-	int m = 0; // Bessel function m order
-	int n = 0; // n th root
-	double root_value = 0.0; // Bessel function root value
-	double phase_pi = 0.0; // Used only for circular membrane (Not used for rectangular membrane)
+	int l = 0; // l = mode number
+	int m = 0; // -l ... 0 .... l
+	double root_value = 0.0; // associated legendre polynomial root value
 };
 
 // Comparator function for sorting based on root_value
-inline bool compareRootValues(const bessel_function_Frequency& a, const bessel_function_Frequency& b) 
+inline bool compareRootValues(const legendre_polynomial_function& a, const legendre_polynomial_function& b)
 {
 	return a.root_value < b.root_value;
 }
@@ -115,6 +114,9 @@ private:
 	Stopwatch_events stopwatch;
 	std::stringstream stopwatch_elapsed_str;
 
-	std::vector<bessel_function_Frequency> eigen_freq;
+	std::vector<legendre_polynomial_function> eigen_freq;
 
+	void set_legendre_polynomial();
+
+	double legendre_polynomial(const int& l_param, const int& m_param);
 };
