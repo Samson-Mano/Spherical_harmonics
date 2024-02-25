@@ -28,7 +28,8 @@ void dynamic_quad_list_store::init(geom_parameters* geom_param_ptr)
 
 void dynamic_quad_list_store::add_quad(const int& quad_id, 
 	dynamic_line_store* edge1,	dynamic_line_store* edge2, 
-	dynamic_line_store* edge3, dynamic_line_store* edge4)
+	dynamic_line_store* edge3, dynamic_line_store* edge4, 
+	dynamic_line_store* edge5, dynamic_line_store* edge6)
 {
 	// Add to the list
 	dynamic_quad_store* temp_quad = new dynamic_quad_store;
@@ -54,9 +55,9 @@ void dynamic_quad_list_store::add_quad(const int& quad_id,
 	dynamic_tri_store* temp_tri341 = new dynamic_tri_store;
 
 	temp_tri341->tri_id = quad_id;
-	temp_tri341->edge1 = edge3;
-	temp_tri341->edge2 = edge4;
-	temp_tri341->edge3 = edge1;
+	temp_tri341->edge1 = edge4;
+	temp_tri341->edge2 = edge5;
+	temp_tri341->edge3 = edge6;
  
 	// Set the face 341 normal
 
@@ -155,7 +156,7 @@ void dynamic_quad_list_store::paint_quadrilaterals()
 
 	// Quad buffer updated seperately for dynamic drawing (To draw cyclic data ex. modal vectors)
 
-	glDrawElements(GL_TRIANGLES, (3 * dyn_quad_count), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (6 * dyn_quad_count), GL_UNSIGNED_INT, 0);
 	dyn_quad_buffer.UnBind();
 	dyn_quad_shader.UnBind();
 
@@ -319,8 +320,8 @@ void dynamic_quad_list_store::get_quad_vertex_buffer(dynamic_quad_store* quad, c
 void dynamic_quad_list_store::get_quad_index_buffer(unsigned int* dyn_quad_vertex_indices, unsigned int& dyn_quad_i_index)
 {
 	//__________________________________________________________________________
-// Add the indices
-// Index 0 1 2 
+	// Add the indices
+	// Index 0 1 2 
 	dyn_quad_vertex_indices[dyn_quad_i_index + 0] = static_cast<int>((dyn_quad_i_index / 6.0) * 4.0) + 0;
 
 	dyn_quad_vertex_indices[dyn_quad_i_index + 1] = static_cast<int>((dyn_quad_i_index / 6.0) * 4.0) + 1;

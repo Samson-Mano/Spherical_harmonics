@@ -28,7 +28,8 @@ void quad_list_store::init(geom_parameters* geom_param_ptr)
 }
 
 void quad_list_store::add_quad(const int& quad_id, line_store* edge1, line_store* edge2,
-	line_store* edge3, line_store* edge4)
+	line_store* edge3, line_store* edge4,
+	line_store* edge5, line_store* edge6)
 {
 	// Add to the list
 	quad_store* temp_quad = new quad_store;
@@ -61,19 +62,19 @@ void quad_list_store::add_quad(const int& quad_id, line_store* edge1, line_store
 	tri_store* temp_tri341 = new tri_store;
 
 	temp_tri341->tri_id = quad_id;
-	temp_tri341->edge1 = edge3;
-	temp_tri341->edge2 = edge4;
-	temp_tri341->edge3 = edge1;
+	temp_tri341->edge1 = edge4;
+	temp_tri341->edge2 = edge5;
+	temp_tri341->edge3 = edge6;
 
 	// Find the normal of the face
-	temp_tri341->face_normal = geom_param_ptr->get_face_normal(edge3->start_pt->pt_coord(),
-		edge4->start_pt->pt_coord(),
-		edge1->start_pt->pt_coord());
+	temp_tri341->face_normal = geom_param_ptr->get_face_normal(edge4->start_pt->pt_coord(),
+		edge5->start_pt->pt_coord(),
+		edge6->start_pt->pt_coord());
 
 	// Find the geometric center of the face
-	temp_tri341->geom_center = geom_param_ptr->findGeometricCenter(edge3->start_pt->pt_coord(),
-		edge4->start_pt->pt_coord(),
-		edge1->start_pt->pt_coord());
+	temp_tri341->geom_center = geom_param_ptr->findGeometricCenter(edge4->start_pt->pt_coord(),
+		edge5->start_pt->pt_coord(),
+		edge6->start_pt->pt_coord());
 
 	temp_quad->tri341 = temp_tri341;
 

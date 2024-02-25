@@ -29,7 +29,8 @@ public:
 
 	void init(geom_parameters* geom_param_ptr);
 	void add_quad(const int& quad_id, dynamic_line_store* edge1, dynamic_line_store* edge2,
-		dynamic_line_store* edge3, dynamic_line_store* edge4);
+		dynamic_line_store* edge3, dynamic_line_store* edge4,
+		dynamic_line_store* edge5, dynamic_line_store* edge6);
 	dynamic_tri_store* get_quadrilateral_face123(const int& quad_id);
 	dynamic_tri_store* get_quadrilateral_face341(const int& quad_id);
 

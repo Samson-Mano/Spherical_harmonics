@@ -42,7 +42,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	}
 
 	// Number of quads/ tris
-	if ((model_quadelements.elementquad_count  + model_trielements.elementtri_count)== 0)
+	if ((model_quadelements.elementquad_count + model_trielements.elementtri_count) == 0)
 	{
 		return;
 	}
@@ -89,11 +89,177 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 		paint_mode_count = matrix_size;
 	}
 
-	// Legendre polynomial
-	set_legendre_polynomial();
+	// Eigenvalue harmonic function
+	set_eigenvalue_harmonic_function();
 
 
+	// Create the eigen vector node map
+	int j = 0;
+	int node_id = 0;
+	this->nodeid_map.clear();
 
+	for (auto& nd_m : model_nodes.nodeMap)
+	{
+		// Get the node id
+		node_id = nd_m.first;
+
+		this->nodeid_map[node_id] = j;
+		j++;
+	}
+
+
+	//________________________________________________________________________________________________________________
+	int num_intervals = this->matrix_size;
+	double progress_interval = num_intervals / 10.0;
+	int last_printed_progress = -1; // Initialize with an invalid value
+
+	double c_radius = 100.0;
+	double c_param = std::sqrt(mat_data.line_tension / mat_data.material_density);
+
+	for (int i = 0; i < this->matrix_size; i++)
+	{
+
+		double t_eigen = (eigen_freq[i].root_value / c_radius) * c_param;
+
+		// Angular frequency wn
+		angular_freq_vector.coeffRef(i) = t_eigen;
+
+		// Eigen value
+		eigen_values_vector.coeffRef(i) = (t_eigen * t_eigen);
+
+		this->number_of_modes++;
+
+		// Frequency
+		double nat_freq = t_eigen / (2.0 * m_pi);
+
+		if (this->number_of_modes <= paint_mode_count)
+		{
+			// Modal results
+			std::stringstream ss;
+			ss << std::fixed << std::setprecision(3) << nat_freq;
+
+			// Add to the string list
+			mode_result_str.push_back("Mode " + std::to_string(i + 1) + " = " + ss.str() + " Hz (l ="
+				+ std::to_string(eigen_freq[i].l) + ", m =" + std::to_string(eigen_freq[i].m) + ")");
+		}
+
+		// Node
+		for (auto& nd_m : model_nodes.nodeMap)
+		{
+			// Get the node ID
+			node_id = nd_m.first;
+
+			// Node is not constrained, so get the co-ordinate
+			glm::vec3 node_pt = nd_m.second.node_pt();
+
+			int matrix_index = nodeid_map[node_id];
+
+			// Eigen vectors
+			double t_eigen_vec = get_spherical_eigen_vec(eigen_freq[i].l, eigen_freq[i].m, node_pt);
+
+			// Add the eigen vectors
+			eigen_vectors_matrix.coeffRef(matrix_index, i) = t_eigen_vec;
+
+		}
+
+		// Normalize the eigen vector matrix
+		double column_max = eigen_vectors_matrix.col(i).maxCoeff();
+
+		eigen_vectors_matrix.col(i) = eigen_vectors_matrix.col(i) / column_max;
+
+
+		// Calculate percentage progress
+		int progress_percentage = static_cast<int>((i / static_cast<float>(this->matrix_size)) * 100);
+		// Check if it's a new 10% interval
+		if ((progress_percentage / 10) > last_printed_progress)
+		{
+			stopwatch_elapsed_str.str("");
+			stopwatch_elapsed_str << stopwatch.elapsed();
+			std::cout << progress_percentage << "% modal analysis completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+			last_printed_progress = (progress_percentage / 10);
+		}
+	}
+
+
+	//_____________________________________________________________________________________
+	// Map the results
+
+	for (auto& nd_m : model_nodes.nodeMap)
+	{
+		node_id = nd_m.first;
+		glm::vec3 node_pt = nd_m.second.node_pt();
+
+		// Modal analysis results
+		std::vector<glm::vec3> node_modal_displ;
+		std::vector<double> node_modal_displ_magnitude;
+
+		// Check whether the node is fixed or not
+		int matrix_index = nodeid_map[node_id];
+
+		for (int i = 0; i < paint_mode_count; i++)
+		{
+			double displ_magnitude = static_cast<float>(eigen_vectors_matrix.coeff(matrix_index, i));
+
+			// get the appropriate modal displacement of this particular node
+			glm::vec3 modal_displ = glm::normalize(node_pt) * static_cast<float>(displ_magnitude);
+
+			// add to modal result of this node
+			node_modal_displ.push_back(modal_displ);
+			node_modal_displ_magnitude.push_back(std::abs(displ_magnitude));
+		}
+
+
+		// Create the modal analysis result node
+		modal_result_nodes.add_result_node(node_id, node_pt, node_modal_displ, node_modal_displ_magnitude);
+	}
+
+	// Set the maximum displacement
+	modal_result_nodes.rslt_maxdispl = 1.0;
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Results mapped to model nodes at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+	//____________________________________________________________________________________________________________________
+
+	// Add the modal tri element result
+	for (auto& tri_m : model_trielements.elementtriMap)
+	{
+		elementtri_store tri = tri_m.second;
+		int tri_id = tri.tri_id;
+
+		modal_result_trielements.add_rslt_elementtriangle(tri_id,
+			&modal_result_nodes.rslt_nodeMap[tri.nd1->node_id],
+			&modal_result_nodes.rslt_nodeMap[tri.nd2->node_id],
+			&modal_result_nodes.rslt_nodeMap[tri.nd3->node_id]);
+	}
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Results mapped to model Tri Elements at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+	//____________________________________________________________________________________________________________________
+
+	// Add the modal quad element result
+	for (auto& quad_m : model_quadelements.elementquadMap)
+	{
+		elementquad_store quad = quad_m.second;
+		int quad_id = quad.quad_id;
+
+		modal_result_quadelements.add_rslt_elementquadrilateral(quad_id,
+			&modal_result_nodes.rslt_nodeMap[quad.nd1->node_id],
+			&modal_result_nodes.rslt_nodeMap[quad.nd2->node_id],
+			&modal_result_nodes.rslt_nodeMap[quad.nd3->node_id],
+			&modal_result_nodes.rslt_nodeMap[quad.nd4->node_id]);
+	}
+
+
+	stopwatch_elapsed_str.str("");
+	stopwatch_elapsed_str << stopwatch.elapsed();
+	std::cout << "Results mapped to model Quad Elements at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+	//____________________________________________________________________________________________________________________
+
+	this->is_modal_analysis_complete = true;
 
 	stopwatch_elapsed_str.str("");
 	stopwatch_elapsed_str << stopwatch.elapsed();
@@ -103,7 +269,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 }
 
 
-void modal_analysis_solver::set_legendre_polynomial()
+void modal_analysis_solver::set_eigenvalue_harmonic_function()
 {
 	// Set the legendre polynomial
 
@@ -118,7 +284,7 @@ void modal_analysis_solver::set_legendre_polynomial()
 	output_file << "Number of nodes = " << matrix_size << std::endl;
 
 
-	// Create the associated legendre polynomial values
+	// Create the eigenvalue harmonic function values
 	eigen_freq.clear();
 	int mode_count = 0;
 
@@ -126,11 +292,12 @@ void modal_analysis_solver::set_legendre_polynomial()
 	{
 		for (int j = -i; j < (i + 1); j++)
 		{
-			// Create the legendre polynomial
-			legendre_polynomial_function temp_p;
+			// Create the eigenvalue harmonic function
+			eigenvalue_harmonic_function temp_p;
 			temp_p.mode_number = (mode_count + 1);
 			temp_p.l = i;
 			temp_p.m = j;
+			temp_p.root_value = i;
 
 			output_file << "mode number = " << (mode_count + 1) << ", l = " << i << ", m = " << j << std::endl;
 
@@ -158,9 +325,31 @@ void modal_analysis_solver::set_legendre_polynomial()
 
 }
 
-
-double modal_analysis_solver::legendre_polynomial(const int& l_param, const int& m_param)
+double modal_analysis_solver::get_spherical_eigen_vec(const int& l_param, const int& m_param, const glm::vec3& node_pt)
 {
-	return 0.0;
+	double nd_theta = std::atan2(node_pt.z, std::abs( node_pt.x)); // angle made in xz plane
+	double nd_phi = std::atan2(node_pt.y, std::abs(node_pt.x)); // angle made in xy plane
+
+	if (m_param < 0)
+	{
+		// Sin parameter (when m is negative)
+		return std::sin(-1.0 * m_param * nd_phi) * legendre_polynomial(l_param, m_param, nd_theta);
+
+	}
+	else
+	{
+		// cos paramter (when m is positive)
+		return std::cos(m_param * nd_phi) * legendre_polynomial(l_param, m_param, nd_theta);
+
+	}
+}
+
+
+double modal_analysis_solver::legendre_polynomial(const int& l_param, const int& m_param, const double& theta)
+{
+	// Cos theta (theta in radians)
+	float x_val = std::cos(theta);
+
+	return std::assoc_legendre(l_param, m_param, x_val);
 
 }

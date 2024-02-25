@@ -41,6 +41,10 @@ void rslt_elementtri_list_store::add_rslt_elementtriangle(int& tri_id, rslt_node
 	rslt_elementtriMap.insert({ tri_id, temp_tri });
 	rslt_elementtri_count++;
 
+	//__________________________ Add the result element triangles
+	mesh_data->add_mesh_triangle(tri_id, (*nd1).node_id, (*nd2).node_id, (*nd3).node_id);
+
+
 }
 
 void rslt_elementtri_list_store::clear_results()

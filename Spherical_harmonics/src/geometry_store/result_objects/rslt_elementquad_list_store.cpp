@@ -44,6 +44,9 @@ void rslt_elementquad_list_store::add_rslt_elementquadrilateral(int& quad_id, rs
 	rslt_elementquadMap.insert({ quad_id, temp_quad });
 	rslt_elementquad_count++;
 
+	//__________________________ Add the result element quadrilaterals
+	mesh_data->add_mesh_quadrilateral(quad_id, (*nd1).node_id, (*nd2).node_id, (*nd3).node_id, (*nd4).node_id);
+
 }
 
 void rslt_elementquad_list_store::clear_results()

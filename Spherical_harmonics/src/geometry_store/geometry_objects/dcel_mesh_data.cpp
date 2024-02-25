@@ -135,8 +135,10 @@ void dcel_mesh_data::add_mesh_quadrilateral(const int& quad_id,	const int& point
 	// Add the mesh quadrilaterals
 	element_quads.add_quad(quad_id, mesh_half_edges[line_id1],
 		mesh_half_edges[line_id2],
+		mesh_half_edges[line_id3],
 		mesh_half_edges[line_id4],
-		mesh_half_edges[line_id5]);
+		mesh_half_edges[line_id5],
+		mesh_half_edges[line_id6]);
 
 	// Set the half edge face data 1st Half triangle of the quadrilateral
 	tri_store* temp_tri123 = element_quads.get_quadrilateral_face123(quad_id);

@@ -804,6 +804,8 @@ void geom_store::paint_modal_analysis_results()
 			// update the modal window list box
 			modal_solver_window->mode_result_str = modal_solver.mode_result_str;
 
+			mesh_modal_rslt_data.set_mesh_wireframe();
+
 			// Set the buffer (nodes, mesh boundaries, tria/ quad)
 			mesh_modal_rslt_data.set_buffer(); // Set the node buffer
 			

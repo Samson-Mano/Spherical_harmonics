@@ -30,7 +30,8 @@ public:
 	~quad_list_store();
 
 	void init(geom_parameters* geom_param_ptr);
-	void add_quad(const int& quad_id, line_store* edge1, line_store* edge2, line_store* edge3, line_store* edge4);
+	void add_quad(const int& quad_id, line_store* edge1, line_store* edge2, line_store* edge3, line_store* edge4,
+		 line_store* edge5, line_store* edge6);
 	tri_store* get_quadrilateral_face123(const int& quad_id);
 	tri_store* get_quadrilateral_face341(const int& quad_id);
 

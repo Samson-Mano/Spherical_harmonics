@@ -60,7 +60,7 @@ struct quad_midnode_eigenvector_store
 };
 
 
-struct legendre_polynomial_function
+struct eigenvalue_harmonic_function
 {
 	int mode_number = 0; // mode number
 	int l = 0; // l = mode number
@@ -69,7 +69,7 @@ struct legendre_polynomial_function
 };
 
 // Comparator function for sorting based on root_value
-inline bool compareRootValues(const legendre_polynomial_function& a, const legendre_polynomial_function& b)
+inline bool compareRootValues(const eigenvalue_harmonic_function& a, const eigenvalue_harmonic_function& b)
 {
 	return a.root_value < b.root_value;
 }
@@ -114,9 +114,11 @@ private:
 	Stopwatch_events stopwatch;
 	std::stringstream stopwatch_elapsed_str;
 
-	std::vector<legendre_polynomial_function> eigen_freq;
+	std::vector<eigenvalue_harmonic_function> eigen_freq;
 
-	void set_legendre_polynomial();
+	void set_eigenvalue_harmonic_function();
 
-	double legendre_polynomial(const int& l_param, const int& m_param);
+	double get_spherical_eigen_vec(const int& l_param, const int& m_param, const glm::vec3& node_pt);
+
+	double legendre_polynomial(const int& l_param, const int& m_param, const double& theta);
 };

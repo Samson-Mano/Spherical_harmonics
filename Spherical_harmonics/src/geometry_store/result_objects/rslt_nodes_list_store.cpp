@@ -40,7 +40,7 @@ void rslt_nodes_list_store::add_result_node(int& node_id, const glm::vec3& node_
 
 	// Insert to the nodes
 	rslt_nodeMap.insert({ node_id, temp_node });
-	node_count++;
+	rslt_node_count++;
 
 	//__________________________ Add the result node points
 	mesh_data->add_mesh_point(node_id, node_pt, node_displ, node_displ_magnitude);
@@ -51,7 +51,7 @@ void rslt_nodes_list_store::add_result_node(int& node_id, const glm::vec3& node_
 void rslt_nodes_list_store::clear_results()
 {
 	// Clear the results
-	node_count = 0;
+	rslt_node_count = 0;
 	rslt_nodeMap.clear();
 	rslt_maxdispl = 0.0;
 

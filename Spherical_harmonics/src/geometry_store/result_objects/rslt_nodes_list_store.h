@@ -15,7 +15,7 @@ struct rslt_node_store
 class rslt_nodes_list_store
 {
 public:
-	unsigned int node_count = 0;
+	unsigned int rslt_node_count = 0;
 	std::unordered_map<int, rslt_node_store> rslt_nodeMap; // Create an unordered_map to store nodes with ID as key
 	double rslt_maxdispl = 0.0;
 
