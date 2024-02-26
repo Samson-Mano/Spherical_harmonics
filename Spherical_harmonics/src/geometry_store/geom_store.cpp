@@ -761,7 +761,7 @@ void geom_store::paint_modal_analysis_results()
 		if (modal_solver_window->show_result_nodes == true)
 		{
 			// Paint the modal nodes
-			mesh_modal_rslt_data.paint_points();
+			// mesh_modal_rslt_data.paint_points();
 		}
 	}
 
@@ -786,6 +786,13 @@ void geom_store::paint_modal_analysis_results()
 	// Modal Analysis 
 	if (modal_solver_window->execute_modal_analysis == true)
 	{
+		// reset the result mesh data
+		mesh_modal_rslt_data.clear_mesh();
+		mesh_pulse_rslt_data.clear_mesh();
+
+		// reset the frequency response and pulse response solution
+		pulse_solver.clear_results();
+
 		// Execute the Modal Analysis
 		modal_solver.modal_analysis_start(model_nodes,
 			model_trielements,
@@ -795,8 +802,6 @@ void geom_store::paint_modal_analysis_results()
 			modal_result_trielements,
 			modal_result_quadelements);
 
-		// reset the frequency response and pulse response solution
-		pulse_solver.clear_results();
 
 		// Check whether the modal analysis is complete or not
 		if (modal_solver.is_modal_analysis_complete == true)

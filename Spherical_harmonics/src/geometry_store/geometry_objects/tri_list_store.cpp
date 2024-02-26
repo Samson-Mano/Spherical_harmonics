@@ -123,6 +123,29 @@ void tri_list_store::clear_triangles()
 {
 	// Delete all the triangles
 	tri_count = 0;
+
+	//// Delete dynamically allocated memory pointed to by the struct members
+	//for (auto& tri : triMap)
+	//{
+	//	if (tri->edge1 != nullptr)
+	//	{
+	//		delete tri->edge1;
+	//		tri->edge1 = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (tri->edge2 != nullptr)
+	//	{
+	//		delete tri->edge2;
+	//		tri->edge2 = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (tri->edge3 != nullptr)
+	//	{
+	//		delete tri->edge3;
+	//		tri->edge3 = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+	//}
+
 	triMap.clear();
 	triId_Map.clear();
 }

@@ -327,19 +327,19 @@ void modal_analysis_solver::set_eigenvalue_harmonic_function()
 
 double modal_analysis_solver::get_spherical_eigen_vec(const int& l_param, const int& m_param, const glm::vec3& node_pt)
 {
-	double nd_theta = std::atan2(node_pt.z, std::abs( node_pt.x)); // angle made in xz plane
-	double nd_phi = std::atan2(node_pt.y, std::abs(node_pt.x)); // angle made in xy plane
+	double nd_theta = std::acos(node_pt.x/100.0); // angle made in xz plane
+	double nd_phi = std::atan2(node_pt.y,node_pt.z); // angle made in xy plane
 
-	if (m_param < 0)
+	if (m_param < -0.1)
 	{
 		// Sin parameter (when m is negative)
-		return std::sin(-1.0 * m_param * nd_phi) * legendre_polynomial(l_param, m_param, nd_theta);
+		return std::sin(-1.0f * m_param * nd_phi) * legendre_polynomial(l_param, m_param, nd_theta);
 
 	}
 	else
 	{
 		// cos paramter (when m is positive)
-		return std::cos(m_param * nd_phi) * legendre_polynomial(l_param, m_param, nd_theta);
+		return std::cos(m_param * nd_phi) *  legendre_polynomial(l_param, m_param, nd_theta);
 
 	}
 }

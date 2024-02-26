@@ -11,7 +11,7 @@ struct dynamic_quad_store
 	dynamic_tri_store* tri341 = nullptr;
 
 	// face normal
-	std::vector<glm::vec3> face_normal; // Face normal of the quadrilateral
+	glm::vec3 face_normal = glm::vec3(0); // Face normal of the quadrilateral
 
 };
 

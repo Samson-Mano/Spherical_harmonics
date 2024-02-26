@@ -178,6 +178,24 @@ void quad_list_store::clear_quadrilaterals()
 {
 	// Delete all the quadrilaterals
 	quad_count = 0;
+
+	//// Delete dynamically allocated memory pointed to by the struct members
+	//for (auto& quad : quadMap)
+	//{
+	//	if (quad->tri123 != nullptr)
+	//	{
+	//		delete quad->tri123;
+	//		quad->tri123 = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (quad->tri341 != nullptr)
+	//	{
+	//		delete quad->tri341;
+	//		quad->tri341 = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//}
+
 	quadMap.clear();
 	quadId_Map.clear();
 }

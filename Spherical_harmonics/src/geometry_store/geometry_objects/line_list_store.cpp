@@ -107,6 +107,42 @@ void line_list_store::clear_lines()
 {
 	// Delete all the lines
 	line_count = 0;
+
+	//// Delete dynamically allocated memory pointed to by the struct members
+	//for (auto& line : lineMap)
+	//{
+	//	if (line.start_pt != nullptr) 
+	//	{
+	//		delete line.start_pt;
+	//		line.start_pt = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (line.end_pt != nullptr) 
+	//	{
+	//		delete line.end_pt;
+	//		line.end_pt = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (line.next_line != nullptr)
+	//	{
+	//		delete line.next_line;
+	//		line.next_line = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (line.twin_line != nullptr)
+	//	{
+	//		delete line.twin_line;
+	//		line.twin_line = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//	if (line.face != nullptr)
+	//	{
+	//		delete line.face;
+	//		line.face = nullptr; // Set to nullptr after deletion to avoid dangling pointers
+	//	}
+
+	//}
+
 	lineMap.clear();
 	lineId_Map.clear();
 }

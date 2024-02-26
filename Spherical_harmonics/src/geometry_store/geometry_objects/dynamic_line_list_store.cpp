@@ -22,13 +22,12 @@ void dynamic_line_list_store::init(geom_parameters* geom_param_ptr)
 		(shadersPath.string() + "/resources/shaders/mesh_dynfrag_shader.frag").c_str());
 
 	// Delete all the lines
-	dyn_line_count = 0;
-	dyn_lineMap.clear();
+	clear_lines();
 }
 
 
 void dynamic_line_list_store::add_line(const int& line_id, dynamic_point_store* start_pt,
-	dynamic_point_store* end_pt, const std::vector<glm::vec3>& line_normal)
+	dynamic_point_store* end_pt, const glm::vec3& line_normal)
 {
 	// Add to the list
 	dyn_lineMap.push_back({ line_id, start_pt,end_pt, nullptr,nullptr,nullptr, line_normal });
@@ -75,11 +74,12 @@ void dynamic_line_list_store::set_buffer()
 
 	VertexBufferLayout line_pt_layout;
 	line_pt_layout.AddFloat(3);  // Node center
+	line_pt_layout.AddFloat(3);  // Line normal
 	line_pt_layout.AddFloat(3);  // Node offset
 	line_pt_layout.AddFloat(1);  // Node Normalized deflection
 
-	// Define the node vertices of the model for a node (3 position, 3 defl, 1 normalized defl length) 
-	const unsigned int line_vertex_count = 7 * 2 * dyn_line_count;
+	// Define the node vertices of the model for a node (3 position, 3 line normal, 3 defl, 1 normalized defl length) 
+	const unsigned int line_vertex_count = 10 * 2 * dyn_line_count;
 	unsigned int line_vertex_size = line_vertex_count * sizeof(float); // Size of the node_vertex
 
 	// Create the Node Deflection buffers
@@ -105,8 +105,8 @@ void dynamic_line_list_store::paint_lines()
 
 void dynamic_line_list_store::update_buffer(const int& dyn_index)
 {
-	// Define the node vertices of the model for a node (3 position, 3 defl, 1 normalized defl length) 
-	const unsigned int line_vertex_count = 7 * 2 * dyn_line_count;
+	// Define the node vertices of the model for a node (3 position, 3 line normal, 3 defl, 1 normalized defl length) 
+	const unsigned int line_vertex_count = 10 * 2 * dyn_line_count;
 	float* line_vertices = new float[line_vertex_count];
 
 	unsigned int line_v_index = 0;
@@ -131,6 +131,18 @@ void dynamic_line_list_store::clear_lines()
 {
 	// Delete all the lines
 	dyn_line_count = 0;
+
+	//// Delete dynamically allocated memory pointed to by the struct members
+	//for (auto& line : dyn_lineMap) 
+	//{
+	//	delete line.start_pt;
+	//	delete line.end_pt;
+	//	delete line.next_line;
+	//	delete line.twin_line;
+	//	delete line.face;
+	//}
+
+	dyn_lineId_Map.clear();
 	dyn_lineMap.clear();
 }
 
@@ -167,7 +179,7 @@ void dynamic_line_list_store::update_opengl_uniforms(bool set_modelmatrix, 	bool
 	if (set_transparency == true)
 	{
 		// set the alpha transparency
-		dyn_line_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		// dyn_line_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
 	}
 
 	if (set_deflscale == true)
@@ -188,16 +200,21 @@ void dynamic_line_list_store::get_line_vertex_buffer(dynamic_line_store& ln, con
 	dyn_line_vertices[dyn_line_v_index + 1] = ln.start_pt->point_loc.y;
 	dyn_line_vertices[dyn_line_v_index + 2] = ln.start_pt->point_loc.z;
 
+	// Point normal
+	dyn_line_vertices[dyn_line_v_index + 3] = ln.line_normal.x;
+	dyn_line_vertices[dyn_line_v_index + 4] = ln.line_normal.y;
+	dyn_line_vertices[dyn_line_v_index + 5] = ln.line_normal.z;
+
 	// Point offset
-	dyn_line_vertices[dyn_line_v_index + 3] = ln.start_pt->point_offset[dyn_index].x;
-	dyn_line_vertices[dyn_line_v_index + 4] = ln.start_pt->point_offset[dyn_index].y;
-	dyn_line_vertices[dyn_line_v_index + 5] = ln.start_pt->point_offset[dyn_index].z;
+	dyn_line_vertices[dyn_line_v_index + 6] = ln.start_pt->point_offset[dyn_index].x;
+	dyn_line_vertices[dyn_line_v_index + 7] = ln.start_pt->point_offset[dyn_index].y;
+	dyn_line_vertices[dyn_line_v_index + 8] = ln.start_pt->point_offset[dyn_index].z;
 
 	// Normalized offset length
-	dyn_line_vertices[dyn_line_v_index + 6] = ln.start_pt->point_offset_mag[dyn_index];
+	dyn_line_vertices[dyn_line_v_index + 9] = ln.start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_line_v_index = dyn_line_v_index + 7;
+	dyn_line_v_index = dyn_line_v_index + 10;
 
 	// End Point
 	// Point location
@@ -205,16 +222,21 @@ void dynamic_line_list_store::get_line_vertex_buffer(dynamic_line_store& ln, con
 	dyn_line_vertices[dyn_line_v_index + 1] = ln.end_pt->point_loc.y;
 	dyn_line_vertices[dyn_line_v_index + 2] = ln.end_pt->point_loc.z;
 
+	// Point normal
+	dyn_line_vertices[dyn_line_v_index + 3] = ln.line_normal.x;
+	dyn_line_vertices[dyn_line_v_index + 4] = ln.line_normal.y;
+	dyn_line_vertices[dyn_line_v_index + 5] = ln.line_normal.z;
+
 	// Point offset
-	dyn_line_vertices[dyn_line_v_index + 3] = ln.end_pt->point_offset[dyn_index].x;
-	dyn_line_vertices[dyn_line_v_index + 4] = ln.end_pt->point_offset[dyn_index].y;
-	dyn_line_vertices[dyn_line_v_index + 5] = ln.end_pt->point_offset[dyn_index].z;
+	dyn_line_vertices[dyn_line_v_index + 6] = ln.end_pt->point_offset[dyn_index].x;
+	dyn_line_vertices[dyn_line_v_index + 7] = ln.end_pt->point_offset[dyn_index].y;
+	dyn_line_vertices[dyn_line_v_index + 8] = ln.end_pt->point_offset[dyn_index].z;
 
 	// Normalized offset length
-	dyn_line_vertices[dyn_line_v_index + 6] = ln.end_pt->point_offset_mag[dyn_index];
+	dyn_line_vertices[dyn_line_v_index + 9] = ln.end_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_line_v_index = dyn_line_v_index + 7;
+	dyn_line_v_index = dyn_line_v_index + 10;
 }
 
 void dynamic_line_list_store::get_line_index_buffer(unsigned int* dyn_line_vertex_indices, unsigned int& dyn_line_i_index)

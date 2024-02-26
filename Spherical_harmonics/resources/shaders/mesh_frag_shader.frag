@@ -14,7 +14,7 @@ void main()
 {
     // diffuse Z Direction
     // Calculate diffuse light component
-    float diffuseIntensity = (1.0f / length(lightDir))* max(dot(v_FragPos - lightDir,v_Normal ),0.0);
+    float diffuseIntensity = 1.15f * (1.0f / length(lightDir))* max(dot(v_FragPos - lightDir,v_Normal ),0.0);
 
     f_Color = vec4(diffuseColor * v_Color, v_transparency) * diffuseIntensity;
 }

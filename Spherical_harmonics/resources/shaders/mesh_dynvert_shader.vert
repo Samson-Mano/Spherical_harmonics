@@ -1,9 +1,6 @@
 #version 330 core
 
 uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
 
 uniform mat4 panTranslation;
 uniform mat4 rotateTranslation;
@@ -15,12 +12,15 @@ uniform float transparency = 1.0f;
 uniform float geom_scale;
 
 layout(location = 0) in vec3 node_position;
-layout(location = 1) in vec3 node_defl;
-layout(location = 2) in float defl_length; // Deflection length Normalized to 1.0
+layout(location = 1) in vec3 node_normal;
+layout(location = 2) in vec3 node_defl;
+layout(location = 3) in float defl_length; // Deflection length Normalized to 1.0
 
 out float v_defl_length;
 out float v_normalized_deflscale;
 out float v_transparency;
+out vec3 v_Normal;
+out vec3 v_FragPos;
 
 void main()
 {
@@ -48,5 +48,13 @@ void main()
 	v_defl_length = defl_length;
 	v_normalized_deflscale = normalized_deflscale;
 	v_transparency = transparency;
+
+	
+    // Send the vertex normal to the fragment shader
+	//calculate normal in world coordinates
+    vec4 surfNormal = (rotateTranslation * vec4(node_normal,1.0f));
+    v_Normal = normalize(surfNormal.xyz);
+
+	v_FragPos = (rotateTranslation * modelMatrix * vec4(defl_position,1.0f)).xyz;
 
 }

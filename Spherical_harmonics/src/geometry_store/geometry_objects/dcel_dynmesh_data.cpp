@@ -15,6 +15,13 @@ void dcel_dynmesh_data::init(geom_parameters* geom_param_ptr)
 
 	// Initialize the geometry objects of the mesh
 	half_edge_count = 0;
+
+	// Delete dynamically allocated memory
+	for (auto ptr : mesh_half_edges)
+	{
+		delete ptr;
+	}
+
 	mesh_half_edges.clear(); // clear the half edge data
 
 	// Nodes
@@ -201,7 +208,7 @@ void dcel_dynmesh_data::set_mesh_wireframe()
 		set_mesh_edge(tri->edge3, line_id, seenLines);
 
 		// Set the mesh normal
-		set_mesh_normal(tri);
+		// set_mesh_normal(tri);
 	}
 
 	// Quadrilaterals
@@ -220,7 +227,7 @@ void dcel_dynmesh_data::set_mesh_wireframe()
 		set_mesh_edge(quad->tri341->edge2, line_id, seenLines);
 
 		// Set the mesh normal
-		set_mesh_normal(quad);
+		// set_mesh_normal(quad);
 	}
 
 }
@@ -230,6 +237,14 @@ void dcel_dynmesh_data::clear_mesh()
 	// Clear the mesh
 	// Half edge
 	half_edge_count = 0;
+
+	// Delete dynamically allocated memory
+	for (auto ptr : mesh_half_edges)
+	{
+		delete ptr;
+	}
+
+
 	mesh_half_edges.clear(); // clear the half edges
 
 	// Nodes
@@ -341,31 +356,22 @@ void dcel_dynmesh_data::set_mesh_edge(dynamic_line_store* edge, int& line_id, st
 	// If the line is not already seen in the opposite direction, add it to the unique lines
 	if (seenLines.find(lineEndpoint_ids) == seenLines.end())
 	{
-		// line normal list
-		std::vector<glm::vec3> line_normal;
+		// line normal
+		glm::vec3 line_normal = glm::vec3(0);
+
+		// get the light and right face normal
+		glm::vec3 left_face_normal = edge->face->face_normal;
 
 		if (edge->twin_line != nullptr)
 		{
-			for (int i = 0; i< static_cast<int> (edge->face->face_normal.size()); i++)
-			{
-				// get the light and right face normal
-				glm::vec3 left_face_normal = edge->face->face_normal[i];
-
-				glm::vec3 right_face_normal = edge->twin_line->face->face_normal[i];
-
-				// Compute the average normal only if twin_line is not nullptr
-				line_normal.push_back(glm::normalize(left_face_normal + right_face_normal));
-
-			}
-		
+			glm::vec3 right_face_normal = edge->twin_line->face->face_normal;
+			// Compute the average normal only if twin_line is not nullptr
+			line_normal = glm::normalize(left_face_normal + right_face_normal);
 		}
 		else
 		{
-			for (int i = 0; i < static_cast<int> (edge->face->face_normal.size()); i++)
-			{
-				// Handle the case where twin_line is nullptr
-				line_normal.push_back(glm::normalize(edge->face->face_normal[i]));
-			}
+			// Handle the case where twin_line is nullptr
+			line_normal = glm::normalize(left_face_normal);
 		}
 
 		edge->line_normal = line_normal;
@@ -380,12 +386,4 @@ void dcel_dynmesh_data::set_mesh_edge(dynamic_line_store* edge, int& line_id, st
 		// Add to the seen lines
 		seenLines.insert(lineEndpoint_ids);
 	}
-}
-
-void dcel_dynmesh_data::set_mesh_normal(dynamic_tri_store* tri)
-{
-}
-
-void dcel_dynmesh_data::set_mesh_normal(dynamic_quad_store* quad)
-{
 }

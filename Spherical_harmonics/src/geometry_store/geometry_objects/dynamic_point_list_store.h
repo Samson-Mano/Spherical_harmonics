@@ -7,8 +7,9 @@ struct dynamic_tri_store; // Forward declaration
 struct dynamic_point_store
 {
 	// store the individual point
-	int point_id = 0;
-	glm::vec3 point_loc;
+	int point_id = -1;
+	glm::vec3 point_loc = glm::vec3(0);
+	glm::vec3 point_normal = glm::vec3(0); 
 	std::vector<glm::vec3> point_offset; // Dynamic point offset
 	std::vector<double> point_offset_mag; // Dynamic point offset values
 

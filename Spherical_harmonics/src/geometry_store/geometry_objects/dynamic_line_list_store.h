@@ -13,7 +13,7 @@ struct dynamic_line_store
 	dynamic_line_store* twin_line = nullptr;        // Opposite half-edge
 	dynamic_tri_store* face = nullptr;    // Face to the left of this half-edge
 
-	std::vector<glm::vec3> line_normal; // Normal of the edge (It is based on the two faces its attached to)
+	glm::vec3 line_normal = glm::vec3(0); // Normal of the edge (It is based on the two faces its attached to)
 
 };
 
@@ -29,7 +29,7 @@ public:
 	~dynamic_line_list_store();
 	void init(geom_parameters* geom_param_ptr);
 	void add_line(const int& line_id, dynamic_point_store* start_pt,
-		dynamic_point_store* end_pt, const std::vector<glm::vec3>& line_normal);
+		dynamic_point_store* end_pt, const glm::vec3& line_normal);
 	dynamic_line_store* get_line(const int& dyn_line_id);
 
 	void set_buffer();

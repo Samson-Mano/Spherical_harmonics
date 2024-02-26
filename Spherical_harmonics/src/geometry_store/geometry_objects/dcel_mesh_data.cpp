@@ -14,6 +14,13 @@ void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 {
 	// Initialize the geometry objects of the mesh
 	half_edge_count = 0;
+
+	// Delete dynamically allocated memory
+	for (auto ptr : mesh_half_edges)
+	{
+		delete ptr;
+	}
+
 	mesh_half_edges.clear(); // clear the half edge data
 
 	// Nodes
@@ -21,8 +28,8 @@ void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 	selected_node_points.init(geom_param_ptr);
 	
 	// Mesh boundaries & mesh normals
-	mesh_normals.init(geom_param_ptr);
 	mesh_boundaries.init(geom_param_ptr);
+	mesh_normals.init(geom_param_ptr);
 
 	// Mesh data
 	element_tris.init(geom_param_ptr);
@@ -335,6 +342,13 @@ void dcel_mesh_data::clear_mesh()
 	// Clear the mesh
 	// Half edge
 	half_edge_count = 0;
+
+	// Delete dynamically allocated memory
+	for (auto ptr : mesh_half_edges) 
+	{
+		delete ptr;
+	}
+
 	mesh_half_edges.clear(); // clear the half edges
 
 	// Nodes

@@ -62,8 +62,4 @@ private:
 
 	void set_mesh_edge(dynamic_line_store* edge, int& line_id, std::set<std::pair<int, int>>& seenLines);
 
-	void set_mesh_normal(dynamic_tri_store* tri);
-
-	void set_mesh_normal(dynamic_quad_store* quad);
-
 };

@@ -11,7 +11,7 @@ struct dynamic_tri_store
 	dynamic_line_store* edge2 = nullptr; // Triangle edge 2
 	dynamic_line_store* edge3 = nullptr; // Triangle edge 3
 
-	std::vector<glm::vec3> face_normal; // Normal of face
+	glm::vec3 face_normal = glm::vec3(0); // Normal of face
 };
 
 
