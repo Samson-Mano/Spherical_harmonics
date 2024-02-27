@@ -47,23 +47,6 @@ void nodes_list_store::add_node(const int& node_id, const double& x_coord, const
 
 }
 
-void nodes_list_store::add_selection_nodes(const std::vector<int>& selected_node_ids)
-{
-	//// Add to Selected Nodes
-	//selected_node_points.clear_points();
-
-	//glm::vec3 temp_color = geom_param_ptr->geom_colors.selection_color;
-	//glm::vec3 node_pt_offset = glm::vec3(0);
-
-	//for (const auto& it : selected_node_ids)
-	//{
-	//	selected_node_points.add_point(nodeMap[it].node_id, nodeMap[it].node_pt.x,
-	//			nodeMap[it].node_pt.y, nodeMap[it].node_pt.z);
-	//}
-
-	//selected_node_points.set_buffer();
-}
-
 
 std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2)
 {
@@ -97,11 +80,13 @@ std::vector<int> nodes_list_store::is_node_selected(const glm::vec2& corner_pt1,
 		// const auto& node = it->second.node_pt;
 		glm::vec4 finalPosition = scaledModelMatrix * glm::vec4(node.x_coord, node.y_coord, node.z_coord, 1.0f) * geom_param_ptr->panTranslation;
 
-		double node_position_x = finalPosition.x;
-		double node_position_y = finalPosition.y;
+		glm::vec3 FragPos = glm::vec3(finalPosition.x, finalPosition.y, finalPosition.z);
+
+		// Dot product check to only select the visible nodes !!!
+		float v_dot = glm::dot(glm::vec3(0.0f,0.0f,1.0f), glm::normalize(FragPos));
 
 		// Check whether the point inside a rectangle
-		if (geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, finalPosition) == true)
+		if (geom_param_ptr->isPointInsideRectangle(screen_cpt1, screen_cpt2, finalPosition) == true && v_dot > 0.0)
 		{
 			selected_node_index.push_back(it->first);
 		}

@@ -38,6 +38,8 @@ public:
 	void clear_points();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
 		bool set_zoomtranslation, bool set_transparency);
+	void update_point_color(const glm::vec3& pt_color);
+
 private:
 	gBuffers point_buffer;
 	Shader point_shader;

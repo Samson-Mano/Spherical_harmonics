@@ -35,6 +35,8 @@ public:
 	void clear_lines();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
 		bool set_zoomtranslation, bool set_transparency);
+	void update_line_color(const glm::vec3& ln_color);
+
 private:
 	gBuffers line_buffer;
 	Shader line_shader;

@@ -186,6 +186,15 @@ void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pant
 	}
 }
 
+
+void line_list_store::update_line_color(const glm::vec3& ln_color)
+{
+	// Update the line color
+	line_shader.setUniform("ptColor", ln_color);
+
+}
+
+
 void line_list_store::get_line_buffer(line_store& ln, float* line_vertices, unsigned int& line_v_index, unsigned int* line_vertex_indices, unsigned int& line_i_index)
 {
 	// Get the node buffer for the shader

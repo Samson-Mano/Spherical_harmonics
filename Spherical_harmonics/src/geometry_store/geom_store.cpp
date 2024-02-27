@@ -657,16 +657,23 @@ void geom_store::paint_model()
 	{
 		// Show the node initial condition
 		// Initial Displacement
+		glPointSize(geom_param.selected_point_size);
+		glLineWidth(geom_param.selected_line_width);
+
 		node_inldispl.paint_inlcond();
 
 		// Initial Velocity
 		node_inlvelo.paint_inlcond();
+
+
+		glPointSize(geom_param.point_size);
+		glLineWidth(geom_param.line_width);
 	}
 
 	if (op_window->is_show_modelnodes == true)
 	{
 		// Show the model nodes
-		mesh_data.paint_points();
+		// mesh_data.paint_points();
 	}
 
 	if (op_window->is_show_loads == true)
@@ -679,6 +686,7 @@ void geom_store::paint_model()
 	{
 		// Initial condition window open
 		paint_node_inlcond_operation();
+
 	}
 
 	if (nd_load_window->is_show_window == true)
@@ -981,7 +989,7 @@ void  geom_store::paint_node_load_operation()
 	// Check whether the selection changed
 	if (nd_load_window->is_selection_changed == true)
 	{
-		model_nodes.add_selection_nodes(nd_load_window->selected_nodes);
+		mesh_data.add_selected_points(nd_load_window->selected_nodes);
 		nd_load_window->is_selection_changed = false;
 	}
 
@@ -1054,7 +1062,7 @@ void geom_store::paint_node_inlcond_operation()
 	// Check whether the selection changed
 	if (nd_inlcond_window->is_selection_changed == true)
 	{
-		model_nodes.add_selection_nodes(nd_inlcond_window->selected_nodes);
+		mesh_data.add_selected_points(nd_inlcond_window->selected_nodes);
 		nd_inlcond_window->is_selection_changed = false;
 	}
 

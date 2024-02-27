@@ -249,10 +249,12 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	glm::vec3 load_color = geom_param_ptr->geom_colors.load_color;
 
 	// Rotate the corner points
-	glm::vec3 load_arrow_startpt = glm::vec3(0.0,0.0, 
-		-1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 0
-	glm::vec3 load_arrow_endpt = glm::vec3(0.0,0.0,
-		-20.0f * (ld.load_value / load_max) * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 1
+	glm::vec3 load_arrow_startpt = glm::normalize(load_loc) *
+		static_cast<float>(- 1.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
+	glm::vec3 load_arrow_endpt = glm::normalize(load_loc) *
+		static_cast<float>(- 20.0f * (ld.load_value / load_max) * (geom_param_ptr->node_circle_radii /geom_param_ptr->geom_scale)); // 1
+	//___________________________
+
 	glm::vec3 load_arrow_pt1 = glm::vec3(0, -2.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
 		-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 2
 	glm::vec3 load_arrow_pt2 = glm::vec3(1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),

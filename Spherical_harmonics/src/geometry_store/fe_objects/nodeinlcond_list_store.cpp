@@ -23,10 +23,25 @@ void nodeinlcond_list_store::init(geom_parameters* geom_param_ptr)
 	inlcond_count = 0;
 }
 
-void nodeinlcond_list_store::set_zero_condition(int inlcond_type,const int& model_type)
+void nodeinlcond_list_store::set_zero_condition(int inlcond_type, const int& model_type)
 {
 	this->inlcond_type = inlcond_type; // Initial condition type 0 - Displacement, 1 - Velocity
-	this->model_type = model_type; // Model type 0, 1 Line, 2,3 Circle
+	this->model_type = model_type; // Model type 0
+
+	if (inlcond_type == 0)
+	{
+		// Displacement initial condition
+		inlcond_points.update_point_color(geom_param_ptr->geom_colors.inlcond_displ_color);
+		inlcond_lines.update_line_color(geom_param_ptr->geom_colors.inlcond_displ_color);
+
+	}
+	else
+	{
+		// Velocity initial condition
+		inlcond_points.update_point_color(geom_param_ptr->geom_colors.inlcond_velo_color);
+		inlcond_lines.update_line_color(geom_param_ptr->geom_colors.inlcond_velo_color);
+
+	}
 
 }
 
@@ -134,11 +149,11 @@ void nodeinlcond_list_store::set_buffer()
 		// int inlcond_sign = inlcond.inl_amplitude_z > 0 ? 1 : -1;
 
 		// initial condition point amplitude
-		double pt_amplitude = -10.0f * (inlcond.inl_amplitude_z / inlcond_max)*(geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale));
+		double pt_amplitude = 10.0f * (inlcond.inl_amplitude_z / inlcond_max) * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale));
 
 		// initial condition point
-		glm::vec3 inlcond_pt_start = glm::vec3(inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z);
-		glm::vec3 inlcond_pt_end = glm::vec3(inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z + pt_amplitude);
+		// glm::vec3 inlcond_pt_start = glm::vec3(inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z);
+		glm::vec3 inlcond_pt_end = glm::normalize(inlcond.inlcond_loc) * static_cast<float>(pt_amplitude);
 
 		// Add the end point
 		inlcond_points.add_point(pt_id, inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z);
@@ -146,16 +161,34 @@ void nodeinlcond_list_store::set_buffer()
 		pt_id++;
 
 		// Add the end point
-		inlcond_points.add_point(pt_id, inlcond.inlcond_loc.x, inlcond.inlcond_loc.y, inlcond.inlcond_loc.z + pt_amplitude);
+		inlcond_points.add_point(pt_id, inlcond.inlcond_loc.x + inlcond_pt_end.x,
+			inlcond.inlcond_loc.y + inlcond_pt_end.y, inlcond.inlcond_loc.z + inlcond_pt_end.z);
 
 		pt_id++;
 
+		//// Add the initial condition line
+		//glm::vec3 normal = glm::normalize(inlcond.inlcond_loc);
+		//inlcond_lines.add_line(ln_id, inlcond_points.get_point(pt_id - 2), inlcond_points.get_point(pt_id - 1),normal);
+
+		//ln_id++;
+	}
+
+	// Add the lines
+	ln_id = 0;
+
+	for (int i = 0; i < static_cast<int>(pt_id / 2.0f); i++)
+	{
 		// Add the initial condition line
-		glm::vec3 normal = glm::vec3(0);
-		inlcond_lines.add_line(ln_id, inlcond_points.get_point(pt_id-2), inlcond_points.get_point(pt_id - 1),normal);
+		point_store* pt1 = inlcond_points.get_point((i * 2) + 0);
+		point_store* pt2 = inlcond_points.get_point((i * 2) + 1);
+
+		glm::vec3 normal = glm::normalize(pt1->pt_coord());
+
+		inlcond_lines.add_line(ln_id, pt1, pt2, normal);
 
 		ln_id++;
 	}
+
 
 
 	inlcond_points.set_buffer();
@@ -183,5 +216,5 @@ void nodeinlcond_list_store::update_geometry_matrices(bool set_modelmatrix, bool
 	// Update model openGL uniforms
 	inlcond_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	inlcond_lines.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	
+
 }

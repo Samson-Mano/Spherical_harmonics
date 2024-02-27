@@ -31,7 +31,6 @@ public:
 	~nodes_list_store();
 	void init(geom_parameters* geom_param_ptr, dcel_mesh_data* mesh_data);
 	void add_node(const int& node_id,  const double& x_coord, const double& y_coord, const double& z_coord);
-	void add_selection_nodes(const std::vector<int>& selected_node_ids);
 
 	std::vector<int> is_node_selected(const glm::vec2& corner_pt1, const glm::vec2& corner_pt2);
 

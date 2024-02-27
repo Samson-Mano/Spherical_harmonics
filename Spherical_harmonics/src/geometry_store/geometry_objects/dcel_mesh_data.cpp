@@ -26,7 +26,8 @@ void dcel_mesh_data::init(geom_parameters* geom_param_ptr)
 	// Nodes
 	node_points.init(geom_param_ptr);
 	selected_node_points.init(geom_param_ptr);
-	
+	selected_node_points.update_point_color(geom_param_ptr->geom_colors.selection_color);
+
 	// Mesh boundaries & mesh normals
 	mesh_boundaries.init(geom_param_ptr);
 	mesh_normals.init(geom_param_ptr);
@@ -45,7 +46,21 @@ void dcel_mesh_data::add_mesh_point(const int& point_id, const double& x_coord, 
 
 void dcel_mesh_data::add_selected_points(const std::vector<int>& selected_points)
 {
+	// Add the selected points
+	selected_node_points.clear_points();
 
+	// Selected points id
+	int id = 0;
+	for (auto& pt_id : selected_points)
+	{
+		// get the node point
+		point_store* pt = node_points.get_point(pt_id);
+
+		selected_node_points.add_point(id, pt->x_coord, pt->y_coord, pt->z_coord);
+		id++;
+	}
+
+	selected_node_points.set_buffer();
 }
 
 void dcel_mesh_data::add_mesh_triangle(const int& tri_id, const int& point_id1, const int& point_id2, const int& point_id3)

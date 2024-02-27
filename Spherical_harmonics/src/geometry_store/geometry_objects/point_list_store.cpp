@@ -148,6 +148,14 @@ void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pan
 	}
 }
 
+void point_list_store::update_point_color(const glm::vec3& pt_color)
+{
+	// Update the point color
+	point_shader.setUniform("ptColor", pt_color);
+
+}
+
+
 void point_list_store::get_point_buffer(point_store& pt, float* point_vertices, unsigned int& point_v_index, unsigned int* point_indices, unsigned int& point_i_index)
 {
 	// Get the node buffer for the shader
