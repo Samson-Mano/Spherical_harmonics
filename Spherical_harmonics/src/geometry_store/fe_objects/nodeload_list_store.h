@@ -44,4 +44,10 @@ private:
 
 	void get_load_buffer(load_data& ld, float* load_vertices, unsigned int& load_v_index, unsigned int* load_indices, unsigned int& load_i_index);
 	int get_unique_load_id(std::vector<int>& all_ids);
+
+	std::vector<glm::vec3> findEquilateralTriangleOnPlane(float x, float y, float z, float size);
+
+	std::pair<glm::vec3, glm::vec3> findOrthogonalVectors(const glm::vec3& v);
+
+	glm::vec3 rotateVector(const glm::vec3& v, const glm::vec3& axis, float angleRadians);
 };

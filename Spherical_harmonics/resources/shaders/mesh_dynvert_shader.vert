@@ -48,13 +48,16 @@ void main()
 	v_defl_length = defl_length;
 	v_normalized_deflscale = normalized_deflscale;
 	v_transparency = transparency;
-
+	
+	v_FragPos = (rotateTranslation * modelMatrix * vec4(defl_position,1.0f)).xyz;
 	
     // Send the vertex normal to the fragment shader
 	//calculate normal in world coordinates
     vec4 surfNormal = (rotateTranslation * vec4(node_normal,1.0f));
     v_Normal = normalize(surfNormal.xyz);
 
-	v_FragPos = (rotateTranslation * modelMatrix * vec4(defl_position,1.0f)).xyz;
+	// mat3 normal_matrix = transpose(inverse(mat3(rotateTranslation)));
+    // v_Normal = normal_matrix * node_normal;
+
 
 }

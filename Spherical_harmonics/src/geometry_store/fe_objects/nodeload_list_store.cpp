@@ -249,20 +249,35 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	glm::vec3 load_color = geom_param_ptr->geom_colors.load_color;
 
 	// Rotate the corner points
-	glm::vec3 load_arrow_startpt = glm::normalize(load_loc) *
-		static_cast<float>(- 1.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
-	glm::vec3 load_arrow_endpt = glm::normalize(load_loc) *
-		static_cast<float>(- 20.0f * (ld.load_value / load_max) * (geom_param_ptr->node_circle_radii /geom_param_ptr->geom_scale)); // 1
-	//___________________________
+	glm::vec3 normalized_load_loc = glm::normalize(load_loc); // Normalize the load location
 
-	glm::vec3 load_arrow_pt1 = glm::vec3(0, -2.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-		-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 2
-	glm::vec3 load_arrow_pt2 = glm::vec3(1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-		 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)), 
-		-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 3
-	glm::vec3 load_arrow_pt3 = glm::vec3(-1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-		 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-		-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 4
+	glm::vec3 load_arrow_startpt = normalized_load_loc *
+		static_cast<float>(1.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
+	glm::vec3 load_arrow_endpt = normalized_load_loc *
+		static_cast<float>(20.0f * (ld.load_value / load_max) * (geom_param_ptr->node_circle_radii /geom_param_ptr->geom_scale)); // 1
+	//___________________________
+	
+	std::pair<glm::vec3, glm::vec3> uv_orthogonal = findOrthogonalVectors(normalized_load_loc);
+
+	// Define offset distances for arrow head points
+	float arrow_head_offset = 2.0f * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale));
+
+
+	// Calculate arrow head points
+	glm::vec3 load_arrow_pt1 = glm::normalize(glm::normalize(uv_orthogonal.first) * arrow_head_offset) * arrow_head_offset;
+
+	glm::vec3 load_arrow_pt2 =  glm::normalize( rotateVector(uv_orthogonal.first,normalized_load_loc,120.0f)) * arrow_head_offset ;
+
+	glm::vec3 load_arrow_pt3 = glm::normalize(rotateVector(uv_orthogonal.first, normalized_load_loc, 240.0f)) * arrow_head_offset;
+
+	//glm::vec3 load_arrow_pt1 = glm::vec3(0, -2.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
+	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 2
+	//glm::vec3 load_arrow_pt2 = glm::vec3(1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
+	//	 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)), 
+	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 3
+	//glm::vec3 load_arrow_pt3 = glm::vec3(-1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
+	//	 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
+	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 4
 
 	//__________________________________________________________________________________________________________
 
@@ -416,3 +431,72 @@ int nodeload_list_store::get_unique_load_id(std::vector<int>& all_ids)
 	return 0;
 }
 
+
+// Function to find the coordinates of an equilateral triangle on a given plane
+std::vector<glm::vec3> nodeload_list_store::findEquilateralTriangleOnPlane(float x, float y, float z, float size) 
+{
+	std::vector<glm::vec3> vertices;
+
+	// Define the normal vector
+	glm::vec3 normalVector(x, y, z);
+
+	// Define the first vertex at the origin
+	glm::vec3 vertex1(x, y, z);
+
+	// Calculate rotation axes
+	glm::vec3 axis1 = glm::normalize(glm::cross(normalVector, glm::vec3(1.0f, 0.0f, 0.0f)));
+	glm::vec3 axis2 = glm::normalize(glm::cross(normalVector, axis1));
+
+	// Construct rotation matrices
+	glm::mat4 rotationMatrix1 = glm::rotate(glm::mat4(1.0f), glm::radians(120.0f), axis1);
+	glm::mat4 rotationMatrix2 = glm::rotate(glm::mat4(1.0f), glm::radians(240.0f), axis2);
+
+	// Rotate the first vertex around the normal vector using rotation matrices
+	glm::vec3 vertex2 = glm::vec3(rotationMatrix1 * glm::vec4(vertex1, 1.0f));
+	glm::vec3 vertex3 = glm::vec3(rotationMatrix2 * glm::vec4(vertex1, 1.0f));
+
+	// Scale the vertices based on the size of the triangle
+	vertex1 *= size;
+	vertex2 *= size;
+	vertex3 *= size;
+
+	vertices.push_back(vertex1);
+	vertices.push_back(vertex2);
+	vertices.push_back(vertex3);
+
+	return vertices;
+}
+
+
+
+std::pair<glm::vec3, glm::vec3> nodeload_list_store::findOrthogonalVectors(const glm::vec3& v)
+{
+	// Step 1: Choose an arbitrary vector u
+	// For example, set one component to zero and others to non-zero values
+	glm::vec3 u = glm::vec3(1.0f, 0.0f, 0.0f);
+	if (v.y != 0.0f || v.z != 0.0f) 
+	{
+		u = glm::vec3(0.0f, 1.0f, 0.0f);
+	}
+
+	// Step 2: Compute the cross product of v and u
+	glm::vec3 w = glm::cross(v, u);
+
+	// Step 3: Normalize w
+	w = glm::normalize(w);
+
+	// Step 4: Compute the cross product of v and w to find the second orthogonal vector
+	glm::vec3 u_prime = glm::cross(v, w);
+
+	return std::make_pair(w, u_prime);
+}
+
+
+glm::vec3 nodeload_list_store::rotateVector(const glm::vec3& v, const glm::vec3& axis, float angleDegrees)
+{
+
+	float angleRadians = glm::radians(angleDegrees); // Convert angle to radians
+
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), angleRadians, axis);
+	return glm::vec3(rotationMatrix * glm::vec4(v, 1.0f));
+}

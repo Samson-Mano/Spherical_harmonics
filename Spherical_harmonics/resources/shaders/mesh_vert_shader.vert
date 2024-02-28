@@ -29,6 +29,9 @@ void main()
 
     //_______________________________________________________________________________________
 
+	
+	v_FragPos = (rotateTranslation * modelMatrix * vec4(node_position,1.0f)).xyz;
+
     // Send the vertex normal to the fragment shader
 	//calculate normal in world coordinates
     vec4 surfNormal = (rotateTranslation * vec4(node_normal,1.0f));
@@ -36,7 +39,9 @@ void main()
 
     v_Color = ptColor;
 
-	v_FragPos = (rotateTranslation * modelMatrix * vec4(node_position,1.0f)).xyz;
+	// mat3 normal_matrix = transpose(inverse(mat3(rotateTranslation)));
+    // v_Normal = normalize( normal_matrix * node_normal);
+
 
 	v_transparency = transparency;
 

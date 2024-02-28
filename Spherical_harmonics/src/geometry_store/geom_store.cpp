@@ -679,7 +679,11 @@ void geom_store::paint_model()
 	if (op_window->is_show_loads == true)
 	{
 		// Show the node Loads
+		glLineWidth(geom_param.selected_line_width);
+
 		node_loads.paint_loads();
+
+		glLineWidth(geom_param.line_width);
 	}
 
 	if (nd_inlcond_window->is_show_window == true)
