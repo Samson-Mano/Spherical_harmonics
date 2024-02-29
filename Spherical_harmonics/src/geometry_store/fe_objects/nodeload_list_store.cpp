@@ -23,6 +23,9 @@ void nodeload_list_store::init(geom_parameters* geom_param_ptr)
 	load_shader.create_shader((shadersPath.string() + "/resources/shaders/load_vert_shader.vert").c_str(),
 		(shadersPath.string() + "/resources/shaders/load_frag_shader.frag").c_str());
 
+	// Update the point color
+	load_shader.setUniform("ptColor", geom_param_ptr->geom_colors.load_color);
+
 	// Clear the loads
 	load_count = 0;
 	load_max = 0.0;
@@ -163,7 +166,7 @@ void nodeload_list_store::set_buffer()
 	VertexBufferLayout load_layout;
 	load_layout.AddFloat(3);  // Position
 	load_layout.AddFloat(3);  // Center
-	load_layout.AddFloat(3);  // Color
+	load_layout.AddFloat(3);  // Normal
 
 	unsigned int load_vertex_size = load_vertex_count * sizeof(float);
 
@@ -205,8 +208,8 @@ void nodeload_list_store::update_geometry_matrices(bool set_modelmatrix, bool se
 		load_shader.setUniform("transparency", 1.0f);
 
 
-		load_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		load_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// load_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+		// load_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		load_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
@@ -236,7 +239,7 @@ void nodeload_list_store::update_geometry_matrices(bool set_modelmatrix, bool se
 
 	if (set_deflscale == true)
 	{
-		// set the deflection scale
+		//// set the deflection scale
 		// load_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
 	}
 }
@@ -246,38 +249,32 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	int load_sign = ld.load_value > 0 ? 1 : -1;
 
 	glm::vec3 load_loc = ld.load_loc;
-	glm::vec3 load_color = geom_param_ptr->geom_colors.load_color;
 
 	// Rotate the corner points
 	glm::vec3 normalized_load_loc = glm::normalize(load_loc); // Normalize the load location
 
 	glm::vec3 load_arrow_startpt = normalized_load_loc *
-		static_cast<float>(1.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
+		static_cast<float>(0.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
 	glm::vec3 load_arrow_endpt = normalized_load_loc *
 		static_cast<float>(20.0f * (ld.load_value / load_max) * (geom_param_ptr->node_circle_radii /geom_param_ptr->geom_scale)); // 1
+
 	//___________________________
-	
 	std::pair<glm::vec3, glm::vec3> uv_orthogonal = findOrthogonalVectors(normalized_load_loc);
+
+	// Define the neck location of the arrow head
+	glm::vec3 load_arrow_neck = normalized_load_loc *
+		static_cast<float>(5.0f * load_sign * (geom_param_ptr->node_circle_radii / geom_param_ptr->geom_scale)); // 0
 
 	// Define offset distances for arrow head points
 	float arrow_head_offset = 2.0f * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale));
 
 
 	// Calculate arrow head points
-	glm::vec3 load_arrow_pt1 = glm::normalize(glm::normalize(uv_orthogonal.first) * arrow_head_offset) * arrow_head_offset;
+	glm::vec3 load_arrow_pt1 = load_arrow_neck + glm::normalize(uv_orthogonal.first) * arrow_head_offset;
 
-	glm::vec3 load_arrow_pt2 =  glm::normalize( rotateVector(uv_orthogonal.first,normalized_load_loc,120.0f)) * arrow_head_offset ;
+	glm::vec3 load_arrow_pt2 = load_arrow_neck + glm::normalize( rotateVector(uv_orthogonal.first,normalized_load_loc,120.0f)) * arrow_head_offset ;
 
-	glm::vec3 load_arrow_pt3 = glm::normalize(rotateVector(uv_orthogonal.first, normalized_load_loc, 240.0f)) * arrow_head_offset;
-
-	//glm::vec3 load_arrow_pt1 = glm::vec3(0, -2.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 2
-	//glm::vec3 load_arrow_pt2 = glm::vec3(1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-	//	 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)), 
-	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 3
-	//glm::vec3 load_arrow_pt3 = glm::vec3(-1.732f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-	//	 1.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale)),
-	//	-5.0f * load_sign * (geom_param_ptr->node_circle_radii / static_cast<float>(geom_param_ptr->geom_scale))); // 4
+	glm::vec3 load_arrow_pt3 = load_arrow_neck + glm::normalize(rotateVector(uv_orthogonal.first, normalized_load_loc, 240.0f)) * arrow_head_offset;
 
 	//__________________________________________________________________________________________________________
 
@@ -292,10 +289,10 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	load_vertices[load_v_index + 4] = load_loc.y;
 	load_vertices[load_v_index + 5] = load_loc.z;
 
-	// Load color
-	load_vertices[load_v_index + 6] = load_color.x;
-	load_vertices[load_v_index + 7] = load_color.y;
-	load_vertices[load_v_index + 8] = load_color.z;
+	// Load vertex normal
+	load_vertices[load_v_index + 6] = normalized_load_loc.x;
+	load_vertices[load_v_index + 7] = normalized_load_loc.y;
+	load_vertices[load_v_index + 8] = normalized_load_loc.z;
 
 	load_v_index = load_v_index + 9;
 
@@ -310,10 +307,10 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	load_vertices[load_v_index + 4] = load_loc.y;
 	load_vertices[load_v_index + 5] = load_loc.z;
 
-	// Load color
-	load_vertices[load_v_index + 6] = load_color.x;
-	load_vertices[load_v_index + 7] = load_color.y;
-	load_vertices[load_v_index + 8] = load_color.z;
+	// Load vertex normal
+	load_vertices[load_v_index + 6] = normalized_load_loc.x;
+	load_vertices[load_v_index + 7] = normalized_load_loc.y;
+	load_vertices[load_v_index + 8] = normalized_load_loc.z;
 
 	load_v_index = load_v_index + 9;
 
@@ -328,10 +325,10 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	load_vertices[load_v_index + 4] = load_loc.y;
 	load_vertices[load_v_index + 5] = load_loc.z;
 
-	// Load color
-	load_vertices[load_v_index + 6] = load_color.x;
-	load_vertices[load_v_index + 7] = load_color.y;
-	load_vertices[load_v_index + 8] = load_color.z;
+	// Load vertex normal
+	load_vertices[load_v_index + 6] = normalized_load_loc.x;
+	load_vertices[load_v_index + 7] = normalized_load_loc.y;
+	load_vertices[load_v_index + 8] = normalized_load_loc.z;
 
 	load_v_index = load_v_index + 9;
 
@@ -346,10 +343,10 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	load_vertices[load_v_index + 4] = load_loc.y;
 	load_vertices[load_v_index + 5] = load_loc.z;
 
-	// Load color
-	load_vertices[load_v_index + 6] = load_color.x;
-	load_vertices[load_v_index + 7] = load_color.y;
-	load_vertices[load_v_index + 8] = load_color.z;
+	// Load vertex normal
+	load_vertices[load_v_index + 6] = normalized_load_loc.x;
+	load_vertices[load_v_index + 7] = normalized_load_loc.y;
+	load_vertices[load_v_index + 8] = normalized_load_loc.z;
 
 	load_v_index = load_v_index + 9;
 
@@ -364,10 +361,10 @@ void nodeload_list_store::get_load_buffer(load_data& ld, float* load_vertices, u
 	load_vertices[load_v_index + 4] = load_loc.y;
 	load_vertices[load_v_index + 5] = load_loc.z;
 
-	// Load color
-	load_vertices[load_v_index + 6] = load_color.x;
-	load_vertices[load_v_index + 7] = load_color.y;
-	load_vertices[load_v_index + 8] = load_color.z;
+	// Load vertex normal
+	load_vertices[load_v_index + 6] = normalized_load_loc.x;
+	load_vertices[load_v_index + 7] = normalized_load_loc.y;
+	load_vertices[load_v_index + 8] = normalized_load_loc.z;
 
 	load_v_index = load_v_index + 9;
 
