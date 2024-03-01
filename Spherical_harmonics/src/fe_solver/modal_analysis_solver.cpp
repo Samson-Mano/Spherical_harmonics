@@ -119,6 +119,30 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	for (int i = 0; i < this->matrix_size; i++)
 	{
 
+		/*
+		Fails at columns
+		899
+
+		959	960
+
+		1020	1021	1022	1023
+
+		1084	1085	1086	1087	1088	1089	1090
+
+		1149	1150	1151	1152	1153	1154	1155	1156	1157	1158	1159
+
+		1217	1218	1219	1220	1221	1222	1223	1224	1225	1226	1227	1228	1229
+
+		1287	1288	1289	1290	1291	1292	1293	1294	1295	1296	1297	1298	1299	1300	1301	1302
+
+		1358	1359	1360	1361	1362	1363	1364	1365	1366	1367	1368	1369	1370	1371	1372	1373	1374	1375	1376
+
+		1432	1433	1434	1435	1436	1437	1438	1439	1440	1441	1442	1443	1444	1445	1446	1447	1448	1449	1450	1451	1452
+
+		1508	1509	1510	1511	1512	1513	1514	1515	1516	1517	1518	1519	1520	1521
+
+		*/
+
 		double t_eigen = (eigen_freq[i].root_value / c_radius) * c_param;
 
 		// Angular frequency wn
@@ -214,7 +238,8 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	}
 
 	// Set the maximum displacement
-	modal_result_nodes.rslt_maxdispl = 1.0;
+	double max_displacement = 1.0;
+	modal_result_nodes.set_max_displacement(max_displacement);
 
 
 	stopwatch_elapsed_str.str("");
@@ -329,6 +354,15 @@ double modal_analysis_solver::get_spherical_eigen_vec(const int& l_param, const 
 {
 	double nd_theta = std::acos(node_pt.x/100.0); // angle made in xz plane
 	double nd_phi = std::atan2(node_pt.y,node_pt.z); // angle made in xy plane
+
+	double leg_check = 0.0;
+	if (l_param == 29 && m_param == 29)
+	{
+		int stop = 0;
+		float x_val = std::cos(nd_theta);
+
+		leg_check = std::assoc_legendre(l_param, m_param, x_val);
+	}
 
 	if (m_param < -0.1)
 	{

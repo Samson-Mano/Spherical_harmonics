@@ -15,7 +15,7 @@ struct pulse_node_result
 
 struct pulse_load_data
 {
-	int node_id = 0;
+	int load_set_id = 0;
 	double load_start_time = 0.0;
 	double load_end_time = 0.0;
 	Eigen::VectorXd modal_LoadamplMatrix;
@@ -38,6 +38,7 @@ public:
 	int time_step_count = 0;
 	double time_interval = 0.0;
 	double total_simulation_time = 0.0;
+	double maximum_displacement = 0.0;
 
 	pulse_analysis_solver();
 	~pulse_analysis_solver();

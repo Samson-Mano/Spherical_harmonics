@@ -22,6 +22,7 @@ public:
 	unsigned int dyn_point_count = 0;
 	std::unordered_map<int, int> dyn_pointId_Map;
 	std::vector<dynamic_point_store> dyn_pointMap;
+	double point_maxdispl = 0.0;
 
 	dynamic_point_list_store();
 	~dynamic_point_list_store();

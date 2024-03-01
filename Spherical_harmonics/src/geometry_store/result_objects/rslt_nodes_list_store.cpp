@@ -47,6 +47,14 @@ void rslt_nodes_list_store::add_result_node(int& node_id, const glm::vec3& node_
 
 }
 
+void rslt_nodes_list_store::set_max_displacement(const double& rslt_maxdispl)
+{
+	// set the node result maximum displacement
+	this->rslt_maxdispl = rslt_maxdispl;
+
+	// Set the same to point maximum displacement
+	mesh_data->node_points.point_maxdispl = rslt_maxdispl;
+}
 
 void rslt_nodes_list_store::clear_results()
 {

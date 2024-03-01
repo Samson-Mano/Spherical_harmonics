@@ -1004,16 +1004,18 @@ void  geom_store::paint_node_load_operation()
 		double load_start_time = nd_load_window->load_start_time; // load start time
 		double load_end_time = nd_load_window->load_end_time; // load end time
 
+		std::vector<glm::vec3> load_locs;
+
 		for (int& id : nd_load_window->selected_nodes)
 		{
-			// Add the loads
-			glm::vec3 node_pt = glm::vec3(model_nodes.nodeMap[id].x_coord,
-				model_nodes.nodeMap[id].y_coord,
-				model_nodes.nodeMap[id].z_coord);
-
-			node_loads.add_loads(id, node_pt,
-								load_start_time, load_end_time, load_amplitude);
+			// Add to the load location
+			load_locs.push_back(model_nodes.nodeMap[id].node_pt());
+			
 		}
+
+		// Add the loads
+		node_loads.add_loads(nd_load_window->selected_nodes, load_locs,
+			load_start_time, load_end_time, load_amplitude);
 
 		node_loads.set_buffer();
 

@@ -17,6 +17,7 @@ void pulse_analysis_solver::clear_results()
 	time_step_count = 0;
 	time_interval = 0.0;
 	total_simulation_time = 0.0;
+	this->pulse_loads.clear();
 
 }
 
@@ -97,11 +98,8 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 
 	this->pulse_loads.clear();
 
-	for (auto& ld_m : node_loads.loadMap)
+	for (auto& ld : node_loads.loadMap)
 	{
-		// get the loads
-		load_data ld = ld_m.second;
-
 		// temporary value to store the pulse load
 		pulse_load_data pulse_ld;
 
@@ -110,7 +108,7 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 			model_nodes);
 
 		// Set the time data to the pulse loads
-		pulse_ld.node_id = ld.node_id;
+		pulse_ld.load_set_id = ld.load_set_id;
 		pulse_ld.load_start_time = ld.load_start_time;
 		pulse_ld.load_end_time = ld.load_end_time;
 
@@ -269,7 +267,10 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 		for (auto& nd_m : model_nodes.nodeMap)
 		{
 			// get the node id
-			int node_id = nd_m.second.node_id;
+			node_store nd = nd_m.second;
+
+			int node_id = nd.node_id;
+			glm::vec3 node_pt = nd.node_pt();
 
 			// Node displacement response
 			glm::vec3 node_displ = glm::vec3(0);
@@ -280,7 +281,7 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 			int matrix_index = nodeid_map[node_id];
 
 			// get the nodal displacement at time t
-			node_displ = glm::vec3(0.0, 0.0, global_displ_ampl_respMatrix.coeff(matrix_index));
+			node_displ = node_pt * static_cast<float>(global_displ_ampl_respMatrix.coeff(matrix_index));
 			displ_magnitude = std::abs(global_displ_ampl_respMatrix.coeff(matrix_index));
 
 
@@ -325,7 +326,7 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 	this->time_interval = time_interval;
 	this->total_simulation_time = total_simulation_time;
 
-	if (pulse_result_nodes.rslt_maxdispl == 0)
+	if (this->maximum_displacement == 0)
 	{
 		// Analysis failed 
 		stopwatch_elapsed_str.str("");
@@ -412,12 +413,13 @@ void pulse_analysis_solver::create_pulse_load_matrices(pulse_load_data& pulse_ld
 	global_reducedLoadMatrix.setZero();
 
 
-	// Node is un-constrained
-	// get the matrix index
-	matrix_index = this->nodeid_map[ld.node_id]; // get the ordered map of the start node ID
+	for (auto& nd_id : ld.node_ids)
+	{
+		// get the matrix index
+		matrix_index = this->nodeid_map[nd_id]; // get the ordered map of the start node ID
 
-	global_reducedLoadMatrix.coeffRef(matrix_index) = ld.load_value;
-
+		global_reducedLoadMatrix.coeffRef(matrix_index) = ld.load_value;
+	}
 
 	// Apply modal Transformation
 	Eigen::VectorXd modal_reducedLoadMatrix(reducedDOF);
@@ -719,6 +721,24 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 	const elementquad_list_store& model_quadelements,
 	const std::unordered_map<int, pulse_node_result>& node_results)
 {
+
+	// Find the maximum displacement of the node result
+	this->maximum_displacement = 0.0;
+
+	for (auto& nd_m : model_nodes.nodeMap)
+	{
+		node_store nd = nd_m.second;
+
+		//get all the two points
+		// Point displacement
+		for (auto& nodept_displ : node_results.at(nd.node_id).node_displ_magnitude)
+		{
+			this->maximum_displacement = std::max(this->maximum_displacement, std::abs(nodept_displ));
+		}
+	}
+
+	//_________________________________________________________________________________________________________________
+
 	// Map the pulse analysis results
 	// map the node results
 	pulse_result_nodes.clear_results();
@@ -731,22 +751,6 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 		// Add to the pulse node results store
 		pulse_result_nodes.add_result_node(nd.node_id, nd.node_pt(), 
 			node_results.at(nd.node_id).node_displ, node_results.at(nd.node_id).node_displ_magnitude);
-	}
-
-	//_________________________________________________________________________________________________________________
-
-	double maximum_displacement = 0.0;
-
-	for (auto& nd_m : pulse_result_nodes.rslt_nodeMap)
-	{
-		rslt_node_store nd = nd_m.second;
-
-		//get all the two points
-		// Point displacement
-		for (auto& nodept_displ : nd.node_displ_magnitude)
-		{
-			maximum_displacement = std::max(maximum_displacement, std::abs(nodept_displ));
-		}
 	}
 
 	//_________________________________________________________________________________________________________________
@@ -792,7 +796,7 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 
 	//_________________________________________________________________________________________________________________
 	// Set the maximim displacement
-	pulse_result_nodes.rslt_maxdispl = maximum_displacement;
+	pulse_result_nodes.set_max_displacement(this->maximum_displacement);
 
 
 }
