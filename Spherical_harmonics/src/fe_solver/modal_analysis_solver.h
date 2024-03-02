@@ -60,19 +60,19 @@ struct quad_midnode_eigenvector_store
 };
 
 
-struct eigenvalue_harmonic_function
-{
-	int mode_number = 0; // mode number
-	int l = 0; // l = mode number
-	int m = 0; // -l ... 0 .... l
-	double root_value = 0.0; // associated legendre polynomial root value
-};
-
-// Comparator function for sorting based on root_value
-inline bool compareRootValues(const eigenvalue_harmonic_function& a, const eigenvalue_harmonic_function& b)
-{
-	return a.root_value < b.root_value;
-}
+//struct eigenvalue_harmonic_function
+//{
+//	int mode_number = 0; // mode number
+//	int l = 0; // l = mode number
+//	int m = 0; // -l ... 0 .... l
+//	double root_value = 0.0; // associated legendre polynomial root value
+//};
+//
+//// Comparator function for sorting based on root_value
+//inline bool compareRootValues(const eigenvalue_harmonic_function& a, const eigenvalue_harmonic_function& b)
+//{
+//	return a.root_value < b.root_value;
+//}
 
 class modal_analysis_solver
 {
@@ -114,9 +114,9 @@ private:
 	Stopwatch_events stopwatch;
 	std::stringstream stopwatch_elapsed_str;
 
-	std::vector<eigenvalue_harmonic_function> eigen_freq;
+	//std::vector<eigenvalue_harmonic_function> eigen_freq;
 
-	void set_eigenvalue_harmonic_function();
+	//void set_eigenvalue_harmonic_function();
 
 	double get_spherical_eigen_vec(const int& l_param, const int& m_param, const glm::vec3& node_pt);
 

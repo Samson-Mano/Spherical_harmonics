@@ -22,7 +22,7 @@ public:
 	unsigned int dyn_point_count = 0;
 	std::unordered_map<int, int> dyn_pointId_Map;
 	std::vector<dynamic_point_store> dyn_pointMap;
-	double point_maxdispl = 0.0;
+	// double point_maxdispl = 0.0;
 
 	dynamic_point_list_store();
 	~dynamic_point_list_store();
@@ -38,6 +38,9 @@ public:
 	void clear_points();
 	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
 		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
+
+	void renormalize_displmagnitude(const double& max_displacement);
+
 private:
 	gBuffers dyn_point_buffer;
 	Shader dyn_point_shader;

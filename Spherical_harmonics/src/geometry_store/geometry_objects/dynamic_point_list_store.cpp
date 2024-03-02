@@ -191,6 +191,23 @@ void dynamic_point_list_store::update_opengl_uniforms(bool set_modelmatrix,	bool
 	}
 }
 
+
+void dynamic_point_list_store::renormalize_displmagnitude(const double& max_displacement)
+{
+	// Re-Normalize the maximum displacement
+
+	for (auto& pt : dyn_pointMap)
+	{
+		for (int i = 0; i <static_cast<int>( pt.point_offset.size()); i++)
+		{
+			pt.point_offset[i] /= max_displacement;
+			pt.point_offset_mag[i] /= max_displacement;
+		}
+	}
+
+}
+
+
 void dynamic_point_list_store::get_point_vertex_buffer(dynamic_point_store& pt,const int& dyn_index,
 	float* dyn_point_vertices, unsigned int& dyn_point_v_index)
 {

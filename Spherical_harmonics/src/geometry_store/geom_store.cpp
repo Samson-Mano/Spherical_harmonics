@@ -938,6 +938,8 @@ void geom_store::paint_pulse_analysis_results()
 
 	if (pulse_solver_window->execute_pulse_analysis == true)
 	{
+		mesh_pulse_rslt_data.clear_mesh();
+
 		// Execute the Pulse response Analysis
 		pulse_solver.pulse_analysis_start(model_nodes,
 			model_trielements,
@@ -961,6 +963,8 @@ void geom_store::paint_pulse_analysis_results()
 			// Set the pulse response analysis result
 			pulse_solver_window->time_interval_atrun = pulse_solver.time_interval;
 			pulse_solver_window->time_step_count = pulse_solver.time_step_count;
+
+			mesh_pulse_rslt_data.set_mesh_wireframe();
 
 			// Reset the buffers for pulse result nodes, lines and quads/ tris
 			mesh_pulse_rslt_data.set_buffer();

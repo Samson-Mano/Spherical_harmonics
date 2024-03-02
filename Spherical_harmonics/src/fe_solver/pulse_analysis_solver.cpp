@@ -75,6 +75,11 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 
 	//output_file.close();
 
+	// Re-initialize the variables
+	pulse_result_nodes.clear_results();
+	pulse_result_trielements.clear_results();
+	pulse_result_quadelements.clear_results();
+
 
 	//____________________________________________________________________________________________________________________
 	// Step: 1 Create the initial displacement matrix (Modal Transformed initial displacement matrix)
@@ -281,7 +286,7 @@ void pulse_analysis_solver::pulse_analysis_start(const nodes_list_store& model_n
 			int matrix_index = nodeid_map[node_id];
 
 			// get the nodal displacement at time t
-			node_displ = node_pt * static_cast<float>(global_displ_ampl_respMatrix.coeff(matrix_index));
+			node_displ = glm::normalize(node_pt) * static_cast<float>(global_displ_ampl_respMatrix.coeff(matrix_index));
 			displ_magnitude = std::abs(global_displ_ampl_respMatrix.coeff(matrix_index));
 
 
@@ -418,7 +423,7 @@ void pulse_analysis_solver::create_pulse_load_matrices(pulse_load_data& pulse_ld
 		// get the matrix index
 		matrix_index = this->nodeid_map[nd_id]; // get the ordered map of the start node ID
 
-		global_reducedLoadMatrix.coeffRef(matrix_index) = ld.load_value;
+		global_reducedLoadMatrix.coeffRef(matrix_index) = -1.0* ld.load_value;
 	}
 
 	// Apply modal Transformation
@@ -733,7 +738,7 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 		// Point displacement
 		for (auto& nodept_displ : node_results.at(nd.node_id).node_displ_magnitude)
 		{
-			this->maximum_displacement = std::max(this->maximum_displacement, std::abs(nodept_displ));
+			this->maximum_displacement = std::max(this->maximum_displacement, nodept_displ);
 		}
 	}
 
@@ -741,7 +746,6 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 
 	// Map the pulse analysis results
 	// map the node results
-	pulse_result_nodes.clear_results();
 
 	for (auto& nd_m : model_nodes.nodeMap)
 	{
@@ -755,7 +759,6 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 
 	//_________________________________________________________________________________________________________________
 	// map the tri results
-	pulse_result_trielements.clear_results();
 
 	for (auto& tri_m : model_trielements.elementtriMap)
 	{
@@ -775,7 +778,6 @@ void pulse_analysis_solver::map_pulse_analysis_results(rslt_nodes_list_store& pu
 
 	//_________________________________________________________________________________________________________________
 	// map the quad results
-	pulse_result_quadelements.clear_results();
 
 	for (auto& quad_m : model_quadelements.elementquadMap)
 	{

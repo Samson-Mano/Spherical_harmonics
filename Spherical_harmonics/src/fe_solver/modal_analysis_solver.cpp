@@ -90,7 +90,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	}
 
 	// Eigenvalue harmonic function
-	set_eigenvalue_harmonic_function();
+	// set_eigenvalue_harmonic_function();
 
 
 	// Create the eigen vector node map
@@ -116,91 +116,127 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 	double c_radius = 100.0;
 	double c_param = std::sqrt(mat_data.line_tension / mat_data.material_density);
 
-	for (int i = 0; i < this->matrix_size; i++)
+	this->number_of_modes = 0;
+
+	for (int l_param = 1; l_param <= this->matrix_size; l_param++)
 	{
-
-		/*
-		Fails at columns
-		899
-
-		959	960
-
-		1020	1021	1022	1023
-
-		1084	1085	1086	1087	1088	1089	1090
-
-		1149	1150	1151	1152	1153	1154	1155	1156	1157	1158	1159
-
-		1217	1218	1219	1220	1221	1222	1223	1224	1225	1226	1227	1228	1229
-
-		1287	1288	1289	1290	1291	1292	1293	1294	1295	1296	1297	1298	1299	1300	1301	1302
-
-		1358	1359	1360	1361	1362	1363	1364	1365	1366	1367	1368	1369	1370	1371	1372	1373	1374	1375	1376
-
-		1432	1433	1434	1435	1436	1437	1438	1439	1440	1441	1442	1443	1444	1445	1446	1447	1448	1449	1450	1451	1452
-
-		1508	1509	1510	1511	1512	1513	1514	1515	1516	1517	1518	1519	1520	1521
-
-		*/
-
-		double t_eigen = (eigen_freq[i].root_value / c_radius) * c_param;
-
-		// Angular frequency wn
-		angular_freq_vector.coeffRef(i) = t_eigen;
-
-		// Eigen value
-		eigen_values_vector.coeffRef(i) = (t_eigen * t_eigen);
-
-		this->number_of_modes++;
-
-		// Frequency
-		double nat_freq = t_eigen / (2.0 * m_pi);
-
-		if (this->number_of_modes <= paint_mode_count)
+		// legendre l parameter
+		for (int m_param = -l_param; m_param < (l_param + 1); m_param++)
 		{
-			// Modal results
-			std::stringstream ss;
-			ss << std::fixed << std::setprecision(3) << nat_freq;
+			// legendre m parameter
 
-			// Add to the string list
-			mode_result_str.push_back("Mode " + std::to_string(i + 1) + " = " + ss.str() + " Hz (l ="
-				+ std::to_string(eigen_freq[i].l) + ", m =" + std::to_string(eigen_freq[i].m) + ")");
+			// Variable to store eigen vectors at column
+			Eigen::VectorXd eigen_vectors_at_column(this->matrix_size);
+			eigen_vectors_at_column.setZero();
+
+			// Node
+			for (auto& nd_m : model_nodes.nodeMap)
+			{
+				// Get the node ID
+				node_id = nd_m.first;
+
+				// Node is not constrained, so get the co-ordinate
+				glm::vec3 node_pt = nd_m.second.node_pt();
+
+				int matrix_index = nodeid_map[node_id];
+
+				// Eigen vectors
+				double t_eigen_vec = get_spherical_eigen_vec(l_param, m_param, node_pt);
+
+				// Add the eigen vectors
+				eigen_vectors_at_column.coeffRef(matrix_index) = t_eigen_vec;
+			}
+
+			//_______________________________________________________________________________
+			// Check whether the eigen vectors at column
+
+			bool has_invalid_value = false;
+
+			// Check for invalid values
+			for (int i = 0; i < static_cast<int>(eigen_vectors_at_column.size()); i++)
+			{
+				double value = eigen_vectors_at_column(i);
+
+				if (std::isnan(value) || std::isinf(value)) 
+				{
+					has_invalid_value = true;
+					break;
+				}
+			}
+
+			if (has_invalid_value == true)
+			{
+				// Legendre polynomial function fails !!! Ignore this particular mode 
+				// It is noticed that for certain l,m,x values associlated legendre polynomial function fails!!
+				// example: l =29, m =29, x =0, l = 30, m =30, x = 0 etc
+
+				continue;
+			}
+
+
+			//________________________________________________________________________________
+			// Normalize the eigen vector matrix
+			double column_max = eigen_vectors_at_column.maxCoeff();
+
+			if (std::fabs(column_max) < 1e-6)
+			{
+				// column maximum is zero
+				continue;
+			}
+
+			// Add to the eigen vector matrix
+			eigen_vectors_matrix.col(this->number_of_modes) = eigen_vectors_at_column / column_max;
+
+
+			//________________________________________________________________________________
+			// Fill the eigen values
+			double t_eigen = ((l_param * (l_param + 1)) / c_radius) * c_param;
+
+			// Angular frequency wn
+			angular_freq_vector.coeffRef(this->number_of_modes) = t_eigen;
+
+			// Eigen value
+			eigen_values_vector.coeffRef(this->number_of_modes) = (t_eigen * t_eigen);
+
+			this->number_of_modes++;
+
+			// Frequency
+			double nat_freq = t_eigen / (2.0 * m_pi);
+
+			if (this->number_of_modes <= paint_mode_count)
+			{
+				// Modal results
+				std::stringstream ss;
+				ss << std::fixed << std::setprecision(3) << nat_freq;
+
+				// Add to the string list
+				mode_result_str.push_back("Mode " + std::to_string(this->number_of_modes) + " = " + ss.str() + " Hz (l ="
+					+ std::to_string(l_param) + ", m =" + std::to_string(m_param) + ")");
+			}
+
+			// Calculate percentage progress
+			int progress_percentage = static_cast<int>((this->number_of_modes / static_cast<float>(this->matrix_size)) * 100);
+			// Check if it's a new 10% interval
+			if ((progress_percentage / 10) > last_printed_progress)
+			{
+				stopwatch_elapsed_str.str("");
+				stopwatch_elapsed_str << stopwatch.elapsed();
+				std::cout << progress_percentage << "% modal analysis completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
+				last_printed_progress = (progress_percentage / 10);
+			}
+
+
+			if (this->number_of_modes >= this->matrix_size)
+			{
+				// Exit both the for loops
+				break;
+			}
 		}
 
-		// Node
-		for (auto& nd_m : model_nodes.nodeMap)
+		if (this->number_of_modes >= this->matrix_size)
 		{
-			// Get the node ID
-			node_id = nd_m.first;
-
-			// Node is not constrained, so get the co-ordinate
-			glm::vec3 node_pt = nd_m.second.node_pt();
-
-			int matrix_index = nodeid_map[node_id];
-
-			// Eigen vectors
-			double t_eigen_vec = get_spherical_eigen_vec(eigen_freq[i].l, eigen_freq[i].m, node_pt);
-
-			// Add the eigen vectors
-			eigen_vectors_matrix.coeffRef(matrix_index, i) = t_eigen_vec;
-
-		}
-
-		// Normalize the eigen vector matrix
-		double column_max = eigen_vectors_matrix.col(i).maxCoeff();
-
-		eigen_vectors_matrix.col(i) = eigen_vectors_matrix.col(i) / column_max;
-
-
-		// Calculate percentage progress
-		int progress_percentage = static_cast<int>((i / static_cast<float>(this->matrix_size)) * 100);
-		// Check if it's a new 10% interval
-		if ((progress_percentage / 10) > last_printed_progress)
-		{
-			stopwatch_elapsed_str.str("");
-			stopwatch_elapsed_str << stopwatch.elapsed();
-			std::cout << progress_percentage << "% modal analysis completed at " << stopwatch_elapsed_str.str() << " secs" << std::endl;
-			last_printed_progress = (progress_percentage / 10);
+			// Exit both the for loops
+			break;
 		}
 	}
 
@@ -294,75 +330,66 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 }
 
 
-void modal_analysis_solver::set_eigenvalue_harmonic_function()
-{
-	// Set the legendre polynomial
-
-	std::ofstream output_file;
-	output_file.open("modal_analysis_results.txt");
-
-	//output_file << "Eigen vector matrix:" << std::endl;
-	//output_file << this->eigen_vectors_matrix << std::endl;
-	//output_file << std::endl;
-
-
-	output_file << "Number of nodes = " << matrix_size << std::endl;
-
-
-	// Create the eigenvalue harmonic function values
-	eigen_freq.clear();
-	int mode_count = 0;
-
-	for (int i = 1; i <= matrix_size; i++)
-	{
-		for (int j = -i; j < (i + 1); j++)
-		{
-			// Create the eigenvalue harmonic function
-			eigenvalue_harmonic_function temp_p;
-			temp_p.mode_number = (mode_count + 1);
-			temp_p.l = i;
-			temp_p.m = j;
-			temp_p.root_value = i;
-
-			output_file << "mode number = " << (mode_count + 1) << ", l = " << i << ", m = " << j << std::endl;
-
-			// Add to the list
-			eigen_freq.push_back(temp_p);
-
-			mode_count++;
-
-			if (mode_count >= matrix_size)
-			{
-				// Exit both the for loops
-				break;
-			}
-
-		}
-
-		if (mode_count >= matrix_size)
-		{
-			// Exit both the for loops
-			break;
-		}
-	}
-
-	output_file.close();
-
-}
+//void modal_analysis_solver::set_eigenvalue_harmonic_function()
+//{
+//	// Set the legendre polynomial
+//
+//	std::ofstream output_file;
+//	output_file.open("modal_analysis_results.txt");
+//
+//	//output_file << "Eigen vector matrix:" << std::endl;
+//	//output_file << this->eigen_vectors_matrix << std::endl;
+//	//output_file << std::endl;
+//
+//
+//	output_file << "Number of nodes = " << matrix_size << std::endl;
+//
+//
+//	// Create the eigenvalue harmonic function values
+//	eigen_freq.clear();
+//	int mode_count = 0;
+//
+//	for (int i = 1; i <= matrix_size; i++)
+//	{
+//		for (int j = -i; j < (i + 1); j++)
+//		{
+//			// Create the eigenvalue harmonic function
+//			eigenvalue_harmonic_function temp_p;
+//			temp_p.mode_number = (mode_count + 1);
+//			temp_p.l = i;
+//			temp_p.m = j;
+//			temp_p.root_value = i;
+//
+//			output_file << "mode number = " << (mode_count + 1) << ", l = " << i << ", m = " << j << std::endl;
+//
+//			// Add to the list
+//			eigen_freq.push_back(temp_p);
+//
+//			mode_count++;
+//
+//			if (mode_count >= matrix_size)
+//			{
+//				// Exit both the for loops
+//				break;
+//			}
+//
+//		}
+//
+//		if (mode_count >= matrix_size)
+//		{
+//			// Exit both the for loops
+//			break;
+//		}
+//	}
+//
+//	output_file.close();
+//
+//}
 
 double modal_analysis_solver::get_spherical_eigen_vec(const int& l_param, const int& m_param, const glm::vec3& node_pt)
 {
 	double nd_theta = std::acos(node_pt.x/100.0); // angle made in xz plane
 	double nd_phi = std::atan2(node_pt.y,node_pt.z); // angle made in xy plane
-
-	double leg_check = 0.0;
-	if (l_param == 29 && m_param == 29)
-	{
-		int stop = 0;
-		float x_val = std::cos(nd_theta);
-
-		leg_check = std::assoc_legendre(l_param, m_param, x_val);
-	}
 
 	if (m_param < -0.1)
 	{

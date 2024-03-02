@@ -53,7 +53,7 @@ void rslt_nodes_list_store::set_max_displacement(const double& rslt_maxdispl)
 	this->rslt_maxdispl = rslt_maxdispl;
 
 	// Set the same to point maximum displacement
-	mesh_data->node_points.point_maxdispl = rslt_maxdispl;
+	mesh_data->node_points.renormalize_displmagnitude(rslt_maxdispl);
 }
 
 void rslt_nodes_list_store::clear_results()
