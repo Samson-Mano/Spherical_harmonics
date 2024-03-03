@@ -149,8 +149,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 
 			//_______________________________________________________________________________
 			// Check whether the eigen vectors at column
-
-			bool has_invalid_value = false;
+			 bool has_invalid_value = false;
 
 			// Check for invalid values
 			for (int i = 0; i < static_cast<int>(eigen_vectors_at_column.size()); i++)
@@ -170,7 +169,24 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 				// It is noticed that for certain l,m,x values associlated legendre polynomial function fails!!
 				// example: l =29, m =29, x =0, l = 30, m =30, x = 0 etc
 
-				continue;
+				//for (int i = 0; i < static_cast<int>(eigen_vectors_at_column.size()); i++)
+				//{
+				//	double value = eigen_vectors_at_column(i);
+
+				//	if (std::isnan(value) || std::isinf(value))
+				//	{
+				//		eigen_vectors_at_column.coeffRef(i) = 1.0;
+
+				//		// has_invalid_value = true;
+				//		// break;
+				//	}
+				//	else
+				//	{
+				//		eigen_vectors_at_column.coeffRef(i) = 0.0;
+				//	}
+				//}
+
+				// continue;
 			}
 
 
@@ -178,10 +194,13 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 			// Normalize the eigen vector matrix
 			double column_max = eigen_vectors_at_column.maxCoeff();
 
-			if (std::fabs(column_max) < 1e-6)
+			if (std::fabs(column_max) < 1e-6) // || std::isnan(column_max) || std::isinf(column_max))
 			{
 				// column maximum is zero
-				continue;
+				column_max = 1.0;
+				eigen_vectors_at_column.setZero();
+
+				// continue;
 			}
 
 			// Add to the eigen vector matrix

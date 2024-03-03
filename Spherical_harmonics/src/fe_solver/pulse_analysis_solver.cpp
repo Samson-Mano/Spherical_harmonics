@@ -378,7 +378,7 @@ void pulse_analysis_solver::create_initial_condition_matrices(Eigen::VectorXd& m
 		// get the matrix index
 		matrix_index = this->nodeid_map[inlc.node_id]; // get the ordered map of the start node ID
 
-		global_reducedInitialDisplacementMatrix.coeffRef(matrix_index) = -1.0 * inlc.inl_amplitude_z;
+		global_reducedInitialDisplacementMatrix.coeffRef(matrix_index) = inlc.inl_amplitude_z;
 
 	}
 
@@ -395,7 +395,7 @@ void pulse_analysis_solver::create_initial_condition_matrices(Eigen::VectorXd& m
 		// get the matrix index
 		matrix_index = this->nodeid_map[inlc.node_id]; // get the ordered map of the start node ID
 
-		global_reducedInitialVelocityMatrix.coeffRef(matrix_index) = -1.0 * inlc.inl_amplitude_z;
+		global_reducedInitialVelocityMatrix.coeffRef(matrix_index) = inlc.inl_amplitude_z;
 
 	}
 
@@ -403,6 +403,23 @@ void pulse_analysis_solver::create_initial_condition_matrices(Eigen::VectorXd& m
 	// Apply modal Transformation
 	modal_reducedInitialDisplacementMatrix = this->eigen_vectors_matrix.transpose() * global_reducedInitialDisplacementMatrix;
 	modal_reducedInitialVelocityMatrix = this->eigen_vectors_matrix.transpose() * global_reducedInitialVelocityMatrix;
+
+
+
+	//std::ofstream output_file;
+	//output_file.open("inl_cond_matrix.txt");
+
+	//output_file << "Intitial condition matrix" << std::endl;
+	//output_file << global_reducedInitialDisplacementMatrix << std::endl;
+	//output_file << std::endl;
+	//output_file << std::endl;
+
+	//output_file << "Intitial condition matrix transformed" << std::endl;
+	//output_file << modal_reducedInitialDisplacementMatrix << std::endl;
+	//output_file << std::endl;
+	//output_file << std::endl;
+
+	//output_file.close();
 
 }
 

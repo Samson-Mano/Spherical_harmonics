@@ -191,7 +191,7 @@ void pulse_analysis_window::render_window()
 		if (ImGui::Button("Deformation Scale"))
 		{
 			defscale_input_mode = true;
-			snprintf(defscale_str, 16, "%.1f", deformation_scale_max); // set the buffer to current deformation scale value
+			snprintf(defscale_str, 16, "%.4f", deformation_scale_max); // set the buffer to current deformation scale value
 		}
 	}
 	else // input mode
@@ -216,14 +216,14 @@ void pulse_analysis_window::render_window()
 
 	// Text for load value
 	ImGui::SameLine();
-	ImGui::Text(" %.1f", deformation_scale_max);
+	ImGui::Text("%.3f", deformation_scale_max);
 
 	// Slider for Deflection scale
 	float deformation_scale_flt = static_cast<float>(deformation_scale_max);
 
 	ImGui::Text("Deformation Scale");
 	ImGui::SameLine();
-	ImGui::SliderFloat(".", &deformation_scale_flt, 0.0f, 100.0f, "%.1f");
+	ImGui::SliderFloat(".", &deformation_scale_flt, 0.0f, 100.0f, "%.3f");
 	deformation_scale_max = deformation_scale_flt;
 
 	////Set the deformation scale
@@ -286,7 +286,7 @@ void pulse_analysis_window::render_window()
 			if (ImGui::Button("Animation Speed"))
 			{
 				animation_speed_input_mode = true;
-				snprintf(animation_speed_str, 16, "%.1f", animation_speed); // set the buffer to current deformation scale value
+				snprintf(animation_speed_str, 16, "%.3f", animation_speed); // set the buffer to current deformation scale value
 			}
 		}
 		else // input mode
@@ -311,7 +311,7 @@ void pulse_analysis_window::render_window()
 
 		// Text for Animation speed value
 		ImGui::SameLine();
-		ImGui::Text(" %.1f", animation_speed);
+		ImGui::Text(" %.3f", animation_speed);
 
 		// Display the time step and time value
 		ImGui::Text("Time = %.3f secs",
