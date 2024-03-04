@@ -408,7 +408,7 @@ void pulse_analysis_solver::create_initial_condition_matrices(Eigen::VectorXd& m
 
 	//std::ofstream output_file;
 	//output_file.open("inl_cond_matrix.txt");
-
+	 
 	//output_file << "Intitial condition matrix" << std::endl;
 	//output_file << global_reducedInitialDisplacementMatrix << std::endl;
 	//output_file << std::endl;

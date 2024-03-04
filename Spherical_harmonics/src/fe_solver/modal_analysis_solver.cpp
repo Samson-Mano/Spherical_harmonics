@@ -186,25 +186,27 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 				//	}
 				//}
 
-				// continue;
+				// eigen_vectors_at_column.setIdentity();
+				continue;
 			}
 
 
 			//________________________________________________________________________________
 			// Normalize the eigen vector matrix
-			double column_max = eigen_vectors_at_column.maxCoeff();
+			double column_max = std::max(std::abs(eigen_vectors_at_column.maxCoeff()), std::abs(eigen_vectors_at_column.minCoeff()));
 
 			if (std::fabs(column_max) < 1e-6) // || std::isnan(column_max) || std::isinf(column_max))
 			{
 				// column maximum is zero
-				column_max = 1.0;
-				eigen_vectors_at_column.setZero();
+				// column_max = 1.0;
+				// eigen_vectors_at_column.setZero();
 
-				// continue;
+				 continue;
 			}
 
+
 			// Add to the eigen vector matrix
-			eigen_vectors_matrix.col(this->number_of_modes) = eigen_vectors_at_column / column_max;
+			eigen_vectors_matrix.col(this->number_of_modes) = eigen_vectors_at_column/ column_max ;
 
 
 			//________________________________________________________________________________
