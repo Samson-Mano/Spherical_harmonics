@@ -39,17 +39,17 @@ f_end = 5.0
 t_delta = 0.001
 t_final = 30
 f_m = 0.1
-f_phase = math.pi*0.5
+f_phase = math.pi*0.0
 
-sinu_chirp = sinusoidal_ChirpAnalysis(f_start, f_end,f_m, math.pi*0.0, t_final, t_delta)
-sinu_chirp1 = sinusoidal_ChirpAnalysis(f_start, f_end,f_m, math.pi*0.5, t_final, t_delta)
+sinu_chirp = sinusoidal_ChirpAnalysis(f_start, f_end,f_m, f_phase, t_final, t_delta)
+# sinu_chirp1 = sinusoidal_ChirpAnalysis(f_start, f_end,f_m, math.pi*0.5, t_final, t_delta)
 
-chirp_result = np.zeros_like(np.arange(0.0, t_final + t_delta, t_delta))
+# chirp_result = np.zeros_like(np.arange(0.0, t_final + t_delta, t_delta))
 
-phase_data = np.arange(-2.0, 2.0, 0.01)
+# phase_data = np.arange(-2.0, 2.0, 0.01)
 
-for i, p_d in enumerate(phase_data):
-    chirp_result = chirp_result + sinusoidal_ChirpAnalysis(f_start, f_end,f_m, math.pi*p_d, t_final, t_delta).sinusoidal_chirp_signal()
+# for i, p_d in enumerate(phase_data):
+#     chirp_result = chirp_result + sinusoidal_ChirpAnalysis(f_start, f_end,f_m, math.pi*p_d, t_final, t_delta).sinusoidal_chirp_signal()
 
 
 # Create a figure and 2 subplots
@@ -57,13 +57,13 @@ fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(20, 8))
 
 # Plot data on each subplot
 axes[0].plot(sinu_chirp.t_data, sinu_chirp.sinusoidal_chirp_freq(), color='blue')
-axes[0].plot(sinu_chirp.t_data, sinu_chirp1.sinusoidal_chirp_freq(), color='orange')
+# axes[0].plot(sinu_chirp.t_data, sinu_chirp1.sinusoidal_chirp_freq(), color='orange')
 axes[0].axhline(y=0.0, color='black', linestyle='-', linewidth=1)
 axes[0].axvline(x=0.0, color='black', linestyle='-', linewidth=1)
 axes[0].set_title('Chirp Frequencies')
 
 # axes[1].plot(sinu_chirp.t_data, sinu_chirp.sinusoidal_chirp_signal() + sinu_chirp1.sinusoidal_chirp_signal(), color='green')
-axes[1].plot(sinu_chirp.t_data, chirp_result, color='green')
+axes[1].plot(sinu_chirp.t_data, sinu_chirp.sinusoidal_chirp_signal(), color='green')
 # axes[1].plot(sinu_chirp.t_data, sinu_chirp1.sinusoidal_chirp_signal(), color='red')
 axes[1].axhline(y=0.0, color='black', linestyle='-', linewidth=1)
 axes[1].axvline(x=0.0, color='black', linestyle='-', linewidth=1)
