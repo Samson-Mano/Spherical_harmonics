@@ -49,7 +49,7 @@ class triangular_ChirpAnalysis:
 f_start = 1.0
 f_end = 5.0
 t_delta = 0.001
-t_final = 10
+t_final = 6
 
 lin_chirp = triangular_ChirpAnalysis(f_start, f_end, t_final, t_delta)
     
