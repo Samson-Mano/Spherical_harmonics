@@ -21,7 +21,7 @@ void quad_list_store::init(geom_parameters* geom_param_ptr)
 	quad_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
 		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
 
-	quad_shader.setUniform("ptColor", geom_param_ptr->geom_colors.triangle_color);
+	quad_shader.setUniform("vertexColor", geom_param_ptr->geom_colors.triangle_color);
 
 	// Delete all the quadrilaterals
 	clear_quadrilaterals();
@@ -200,41 +200,37 @@ void quad_list_store::clear_quadrilaterals()
 	quadId_Map.clear();
 }
 
-void quad_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation, bool set_zoomtranslation, bool set_transparency)
+void quad_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency)
 {
 	if (set_modelmatrix == true)
 	{
+		// set the transparency
+		quad_shader.setUniform("vertexTransparency", 1.0f);
+
+		// set the projection matrix
+		quad_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
 		// set the model matrix
-		// quad_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		quad_shader.setUniform("transparency", 1.0f);
-
-		// quad_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		// quad_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		quad_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
+
 	}
 
-	if (set_pantranslation == true)
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		quad_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
+		quad_shader.setUniform("viewMatrix", viewMatrix, false);
 	}
 
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		quad_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		quad_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
 
 	if (set_transparency == true)
 	{
-		// set the alpha transparency
-		quad_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		// set the alpha transparency  static_cast<float>(geom_param_ptr->geom_transparency)
+		quad_shader.setUniform("vertexTransparency", static_cast<float>(geom_param_ptr->geom_transparency));
 	}
 }
 

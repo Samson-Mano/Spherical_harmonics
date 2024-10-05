@@ -1,48 +1,27 @@
 #version 330 core
 
 uniform mat4 modelMatrix;
-uniform mat4 panTranslation;
-uniform mat4 rotateTranslation;
-uniform float zoomscale;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
 
-uniform float transparency;
-uniform vec3 ptColor;
+uniform vec3 vertexColor; // color of the mesh
+uniform float vertexTransparency; // Transparency of the mesh
 
 layout(location = 0) in vec3 node_position;
 layout(location = 1) in vec3 node_normal;
 
-out vec3 v_Normal;
+out vec3 vertNormal;
 out vec3 v_Color;
-out float v_transparency;
-out vec3 v_FragPos;
 
 void main()
 {
-	// apply zoom scaling and Rotation to model matrix
-	mat4 scalingMatrix = mat4(1.0)*zoomscale;
-	scalingMatrix[3][3] = 1.0f;
-	mat4 scaledModelMatrix =  rotateTranslation * scalingMatrix * modelMatrix;
+    // Vertex Normal transformed using only model-view matrix (not projection)
+    vertNormal = normalize(transpose(inverse(mat3(viewMatrix * modelMatrix))) * node_normal);
 
+    // Set the point color and transparency
+    v_Color = vertexColor;
 
-	// Final position passed to fragment shader
-    gl_Position = scaledModelMatrix * vec4(node_position,1.0f) * panTranslation;
-
-    //_______________________________________________________________________________________
-
-	
-	v_FragPos = (rotateTranslation * modelMatrix * vec4(node_position,1.0f)).xyz;
-
-    // Send the vertex normal to the fragment shader
-	//calculate normal in world coordinates
-    vec4 surfNormal = (rotateTranslation * vec4(node_normal,1.0f));
-    v_Normal = normalize(surfNormal.xyz);
-
-    v_Color = ptColor;
-
-	// mat3 normal_matrix = transpose(inverse(mat3(rotateTranslation)));
-    // v_Normal = normalize( normal_matrix * node_normal);
-
-
-	v_transparency = transparency;
-
+    // Final position with projection matrix (fixes clipping issues)
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(node_position, 1.0);
 }
+

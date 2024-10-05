@@ -147,13 +147,16 @@ void app_window::app_render()
 	imgui_font = io.Fonts->AddFontFromFileTTF("./resources/fonts/FreeSans.ttf", 18);
 
 	// Z Clamping
-	glEnable(GL_DEPTH_CLAMP);
-	// glEnable(GL_DEPTH_TEST); // Enable depth testing
+	// glEnable(GL_DEPTH_CLAMP);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_LINE_SMOOTH);
+
+	glEnable(GL_DEPTH_TEST); // Enable depth testing
+	// glDisable(GL_DEPTH_TEST);
+	glFrontFace(GL_CCW);  // Use counter clockwise winding
 
 	// Set the point size and line width
 	// Set the point size

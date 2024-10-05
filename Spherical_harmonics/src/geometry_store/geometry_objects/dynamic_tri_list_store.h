@@ -34,8 +34,7 @@ public:
 	void paint_triangles();
 	void update_buffer(const int& dyn_index);
 	void clear_triangles();
-	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
+	void update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_deflscale);
 private:
 	gBuffers dyn_tri_buffer;
 	Shader dyn_tri_shader;

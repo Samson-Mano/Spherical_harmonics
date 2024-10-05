@@ -33,7 +33,7 @@ void geom_parameters::init()
 	glm::vec3 mesh_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Lavender   glm::vec3(0.90196f, 0.90196f, 0.98039f)
 
 	geom_colors.point_color = mesh_color; // Light Red glm::vec3(0.8f, 0.2f, 0.2f);
-	geom_colors.edge_color = mesh_color *0.7f;  // Dark Orange  glm::vec3(1.0f, 0.54901f, 0.6f);
+	geom_colors.edge_color = glm::vec3(1.0f, 0.54901f, 0.6f);  // Dark Orange  glm::vec3(1.0f, 0.54901f, 0.6f);   mesh_color *0.7f
 	geom_colors.triangle_color = mesh_color;  // Lavender  
 
 	geom_colors.ptmass_color = glm::vec3(0.2f, 0.7f, 0.2f); // Green
@@ -47,30 +47,26 @@ void geom_parameters::init()
 	geom_colors.inlcond_displ_color = glm::vec3(0.54f, 0.06f, 0.31f); 
 	geom_colors.inlcond_velo_color = glm::vec3(0.2, 0.7, 0.2); // Green
 
-
-
-	// Assuming viewer position is (0, 0, 0)
-	// Camera position is (-1, 0, 0) (offset to the left)
-
-	// Example view matrix (camera transformation)
-	glm::vec3 cameraPosition(0.0f, 0.0f, 1.0f); // Camera position
-	glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);    // Camera target (where it's looking)
-	glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);        // Up vector
-
-	this->viewMatrix = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
-
 	// Example projection matrix (parallel projection)
 	float left = -1.0f;    // Left clipping plane
 	float right = 1.0f;    // Right clipping plane
 	float bottom = -1.0f;  // Bottom clipping plane
 	float top = 1.0f;      // Top clipping plane
-	float nearPlane = -1.0f; // Near clipping plane
-	float farPlane = 1.0f;  // Far clipping plane
+	float nearPlane = 100.0f; // Near clipping plane
+	float farPlane = -100.0f;  // Far clipping plane
 
 	this->projectionMatrix = glm::ortho(left, right, bottom, top, nearPlane, farPlane);
 
 	// Set the default rotation matrix
-	this->rotateTranslation = glm::mat4_cast(default_transl);
+	// Important flip the rotation because the view direction and ligt direction are -1 Z-direction
+
+	glm::mat4 flipMatrix = glm::mat4(1.0f);
+	flipMatrix[0][0] = -1.0f; // To flip the X-axis (left-right)
+	flipMatrix[1][1] = -1.0f; // To flip the Y-axis (top-bottom)
+
+	glm::mat4 rotationMatrix = glm::mat4_cast(default_transl);
+
+	this->rotateTranslation = flipMatrix * rotationMatrix;
 
 //	Theme 1:
 //

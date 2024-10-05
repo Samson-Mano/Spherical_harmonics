@@ -2,14 +2,15 @@
 
 in float v_defl_length;
 in float v_normalized_deflscale;
-in float v_transparency;
 in vec3 v_Normal;
-in vec3 v_FragPos;
 
 out vec4 f_Color; // fragment's final color (out to the fragment shader)
 
-const vec3 lightDir = vec3(200.0, 200.0, -2500.0); // Light Direction
-// const vec3 lightDir = vec3(0.0, 0.0, -1.0); // Light Direction
+
+vec3 unreal(vec3 x) 
+{
+    return x / (x + 0.155) * 1.019;
+}
 
 
 vec3 jetHeatmap(float value) 
@@ -21,17 +22,39 @@ vec3 jetHeatmap(float value)
 
 void main() 
 {
-    // diffuse Z Direction
-    // Calculate diffuse light component
-    float diffuseIntensity =  1.15f * (1.0f / length(lightDir))* max(dot(v_FragPos - lightDir,v_Normal ),0.0);
 
-    // float diffuseIntensity = max(dot(v_FragPos - lightDir,v_Normal),0.0);
-
-    //___________________________________________________________________________________________________________
-
+    // Set the color    
     float interpolated_defl = v_defl_length *  v_normalized_deflscale; // varies between maximum of -1.0 to 1.0
 
     vec3 vertexColor = jetHeatmap(interpolated_defl);
 
-    f_Color = vec4(vertexColor, v_transparency) * diffuseIntensity; // Set the final color
+    //_______________________________________________________________________________
+    // View direction fixed at -z
+    vec3 viewPos = vec3(0.0, 0.0, -1.0);
+
+    // Light direction fixed at -z
+    vec3 uniLightDir = vec3(0.0, 0.0, -1.0);
+
+    // Halfway vector between view direction and light direction
+    vec3 halfDir = normalize(viewPos + uniLightDir);
+
+    // Color with slight mix to white for specular highlights
+    vec3 specColor = mix(vertexColor, vec3(1.0, 1.0, 1.0), 0.1) * 1.5;
+    vec3 diffColor = vertexColor;
+    float shineness = 40.0;
+
+    // Calculate specular and diffuse lighting
+    float specular = pow(max(0.0, dot(halfDir, v_Normal)), shineness);
+    float diffuse = max(0.0, dot(uniLightDir, v_Normal));
+    float ambient = 0.05;
+    
+    // Final color with lighting
+    vec3 finalColor = (diffuse + ambient) * diffColor + specular * specColor;
+
+    // Tone mapping
+    finalColor = unreal(finalColor);
+
+    //___________________________________________________________________________________________________________
+
+    f_Color = vec4(finalColor, 1.0f); // Set the final color
 }

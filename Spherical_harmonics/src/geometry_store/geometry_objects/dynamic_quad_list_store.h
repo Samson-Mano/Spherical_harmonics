@@ -39,8 +39,7 @@ public:
 	void paint_quadrilaterals();
 	void update_buffer(const int& dyn_index);
 	void clear_quadrilaterals();
-	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency, bool set_deflscale);
+	void update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_deflscale);
 private:
 	gBuffers dyn_quad_buffer;
 	Shader dyn_quad_shader;

@@ -95,13 +95,16 @@ void dynamic_tri_list_store::set_buffer()
 
 	VertexBufferLayout tri_pt_layout;
 	tri_pt_layout.AddFloat(3);  // Node center
-	tri_pt_layout.AddFloat(3);  // face normal
 	tri_pt_layout.AddFloat(3);  // Node offset
+	tri_pt_layout.AddFloat(3);  // Other point 1 center
+	tri_pt_layout.AddFloat(3);  // Other point 1 offset
+	tri_pt_layout.AddFloat(3);  // Other point 2 center
+	tri_pt_layout.AddFloat(3);  // Other point 2 offset
 	tri_pt_layout.AddFloat(1);  // Defl
 
 
-	// Define the node vertices of the model for a node (3 position, 3 face normal, 3 defl, 1 color) 
-	const unsigned int tri_vertex_count = 10 * 3 * dyn_tri_count;
+	// Define the node vertices of the model for a node (3 x (3 position, 3 defl) 1 defl mag) 18 + 1
+	const unsigned int tri_vertex_count = 19 * 3 * dyn_tri_count;
 	unsigned int tri_vertex_size = tri_vertex_count * sizeof(float); // Size of the node_vertex
 
 	// Create the Node Deflection buffers
@@ -127,8 +130,8 @@ void dynamic_tri_list_store::paint_triangles()
 
 void dynamic_tri_list_store::update_buffer(const int& dyn_index)
 {
-	// Define the node vertices of the model for a node (3 position, 3 face normal, 3 defl, 1 color) 
-	const unsigned int tri_vertex_count = 10 * 3 * dyn_tri_count;
+	// Define the node vertices of the model for a node (3 x (3 position, 3 defl) 1 defl mag) 18 + 1
+	const unsigned int tri_vertex_count = 19 * 3 * dyn_tri_count;
 	float* tri_vertices = new float[tri_vertex_count];
 
 	unsigned int tri_v_index = 0;
@@ -169,40 +172,30 @@ void dynamic_tri_list_store::clear_triangles()
 }
 
 
-void dynamic_tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
+void dynamic_tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_deflscale)
 {
 	if (set_modelmatrix == true)
 	{
-		// set the model matrix
+		// set the geom scale
 		dyn_tri_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		dyn_tri_shader.setUniform("transparency", 0.7f);
 
+		// set the projection matrix
+		dyn_tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
+		// set the model matrix
 		dyn_tri_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
-	if (set_pantranslation == true)
+
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		dyn_tri_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-	}
-
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		dyn_tri_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		dyn_tri_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
-
-	if (set_transparency == true)
-	{
-		// set the alpha transparency
-		// dyn_tri_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		dyn_tri_shader.setUniform("viewMatrix", viewMatrix, false);
 	}
 
 	if (set_deflscale == true)
@@ -211,6 +204,7 @@ void dynamic_tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool s
 		dyn_tri_shader.setUniform("normalized_deflscale", static_cast<float>(geom_param_ptr->normalized_defl_scale));
 		dyn_tri_shader.setUniform("deflscale", static_cast<float>(geom_param_ptr->defl_scale));
 	}
+
 
 }
 
@@ -224,66 +218,115 @@ void dynamic_tri_list_store::get_tri_vertex_buffer(dynamic_tri_store* tri, const
 	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge1->start_pt->point_loc.y;
 	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge1->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->face_normal.x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->face_normal.y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->face_normal.z;
-
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge1->start_pt->point_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge1->start_pt->point_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge1->start_pt->point_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge1->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 1 location
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge2->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge2->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge2->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 10] = tri->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 11] = tri->edge2->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_tri_vertices[dyn_tri_v_index + 12] = tri->edge3->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 13] = tri->edge3->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 14] = tri->edge3->start_pt->point_loc.z;
+
+	// Other Point 2 maximum deflection
+	dyn_tri_vertices[dyn_tri_v_index + 15] = tri->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 16] = tri->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 17] = tri->edge3->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge1->start_pt->point_offset_mag[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 18] = tri->edge1->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_tri_v_index = dyn_tri_v_index + 10;
+	dyn_tri_v_index = dyn_tri_v_index + 19;
 
+	//______________________________________________________________________________________________________
 	// Tri Point 2
 	// Point location
 	dyn_tri_vertices[dyn_tri_v_index + 0] = tri->edge2->start_pt->point_loc.x;
 	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge2->start_pt->point_loc.y;
 	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge2->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->face_normal.x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->face_normal.y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->face_normal.z;
-
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge2->start_pt->point_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge2->start_pt->point_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge2->start_pt->point_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge2->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 1 location
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge3->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge3->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge3->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 10] = tri->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 11] = tri->edge3->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_tri_vertices[dyn_tri_v_index + 12] = tri->edge1->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 13] = tri->edge1->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 14] = tri->edge1->start_pt->point_loc.z;
+
+	// Other Point 2 offset
+	dyn_tri_vertices[dyn_tri_v_index + 15] = tri->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 16] = tri->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 17] = tri->edge1->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge2->start_pt->point_offset_mag[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 18] = tri->edge2->start_pt->point_offset_mag[dyn_index];
 	
 	// Iterate
-	dyn_tri_v_index = dyn_tri_v_index + 10;
+	dyn_tri_v_index = dyn_tri_v_index + 19;
 
-
+	//______________________________________________________________________________________________________
 	// Tri Point 3
 	// Point location
 	dyn_tri_vertices[dyn_tri_v_index + 0] = tri->edge3->start_pt->point_loc.x;
 	dyn_tri_vertices[dyn_tri_v_index + 1] = tri->edge3->start_pt->point_loc.y;
 	dyn_tri_vertices[dyn_tri_v_index + 2] = tri->edge3->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->face_normal.x;
-	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->face_normal.y;
-	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->face_normal.z;
-
 	// Point offset
-	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge3->start_pt->point_offset[dyn_index].x;
-	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge3->start_pt->point_offset[dyn_index].y;
-	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge3->start_pt->point_offset[dyn_index].z;
+	dyn_tri_vertices[dyn_tri_v_index + 3] = tri->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 4] = tri->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 5] = tri->edge3->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 1 location
+	dyn_tri_vertices[dyn_tri_v_index + 6] = tri->edge1->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 7] = tri->edge1->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 8] = tri->edge1->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 10] = tri->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 11] = tri->edge1->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_tri_vertices[dyn_tri_v_index + 12] = tri->edge2->start_pt->point_loc.x;
+	dyn_tri_vertices[dyn_tri_v_index + 13] = tri->edge2->start_pt->point_loc.y;
+	dyn_tri_vertices[dyn_tri_v_index + 14] = tri->edge2->start_pt->point_loc.z;
+
+	// Other Point 2 offset
+	dyn_tri_vertices[dyn_tri_v_index + 15] = tri->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_tri_vertices[dyn_tri_v_index + 16] = tri->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_tri_vertices[dyn_tri_v_index + 17] = tri->edge2->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_tri_vertices[dyn_tri_v_index + 9] = tri->edge3->start_pt->point_offset_mag[dyn_index];
+	dyn_tri_vertices[dyn_tri_v_index + 18] = tri->edge3->start_pt->point_offset_mag[dyn_index];
 	
 	// Iterate
-	dyn_tri_v_index = dyn_tri_v_index + 10;
+	dyn_tri_v_index = dyn_tri_v_index + 19;
 }
 
 

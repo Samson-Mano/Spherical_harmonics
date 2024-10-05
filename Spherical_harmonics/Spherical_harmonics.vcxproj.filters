@@ -204,6 +204,10 @@
     <None Include="resources\shaders\mesh_vert_shader.vert" />
     <None Include="resources\shaders\mesh_dynfrag_shader.frag" />
     <None Include="resources\shaders\mesh_dynvert_shader.vert" />
+    <None Include="resources\shaders\ln_frag_shader.frag" />
+    <None Include="resources\shaders\ln_vert_shader.vert" />
+    <None Include="resources\shaders\ln_dynfrag_shader.frag" />
+    <None Include="resources\shaders\ln_dynvert_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\fonts\CanadaDBNormal.ttf" />

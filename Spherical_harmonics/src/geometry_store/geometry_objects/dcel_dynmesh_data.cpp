@@ -324,8 +324,12 @@ void dcel_dynmesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pa
 	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
 	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
-	element_quads.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency, set_deflscale);
+	
+
+	bool set_viewmatrix = set_pantranslation || set_rotatetranslation || set_zoomtranslation;
+
+	element_tris.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_deflscale);
+	element_quads.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_deflscale);
 
 }
 

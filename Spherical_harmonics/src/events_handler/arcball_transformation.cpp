@@ -125,5 +125,15 @@ void arcball_transformation::setDefault(const int& viewType)
 
 glm::mat4 arcball_transformation::getRotationMatrix()
 {
-    return glm::mat4_cast(this->rotationQuaternion);
+    // Important flip the rotation because the view direction and ligt direction are -1 Z-direction
+    glm::mat4 flipMatrix = glm::mat4(1.0f);
+    flipMatrix[0][0] = -1.0f; // To flip the X-axis (left-right)
+    flipMatrix[1][1] = -1.0f; // To flip the Y-axis (top-bottom)
+
+
+    glm::mat4 rotationMatrix = glm::mat4_cast(this->rotationQuaternion);
+    glm::mat4 correctedRotation = flipMatrix * rotationMatrix; // Apply the flip correction
+
+
+    return correctedRotation;
 }

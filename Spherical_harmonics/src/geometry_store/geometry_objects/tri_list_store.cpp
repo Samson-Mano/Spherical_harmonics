@@ -21,7 +21,7 @@ void tri_list_store::init(geom_parameters* geom_param_ptr)
 	tri_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
 		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
 
-	tri_shader.setUniform("ptColor", geom_param_ptr->geom_colors.triangle_color);
+	tri_shader.setUniform("vertexColor", geom_param_ptr->geom_colors.triangle_color);
 
 	// Delete all the triangles
 	clear_triangles();
@@ -150,45 +150,37 @@ void tri_list_store::clear_triangles()
 	triId_Map.clear();
 }
 
-void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation, 
-	bool set_zoomtranslation, bool set_transparency)
+void tri_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency)
 {
 	if (set_modelmatrix == true)
 	{
+		// set the transparency
+		tri_shader.setUniform("vertexTransparency", 1.0f);
+
+		// set the projection matrix
+		tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
 		// set the model matrix
-		// tri_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		tri_shader.setUniform("transparency", 1.0f);
-
-		// tri_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		// tri_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
 		tri_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
+
 	}
 
-	if (set_pantranslation == true)
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		tri_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
+		tri_shader.setUniform("viewMatrix", viewMatrix, false);
 	}
 
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		tri_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-
-		// std::cout << "RotateM" << glm::to_string(geom_param_ptr->rotateTranslation) << std::endl;
-
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		tri_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
 
 	if (set_transparency == true)
 	{
-		// set the alpha transparency
-		tri_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		// set the alpha transparency  static_cast<float>(geom_param_ptr->geom_transparency)
+		tri_shader.setUniform("vertexTransparency", static_cast<float>(geom_param_ptr->geom_transparency));
 	}
 }
 

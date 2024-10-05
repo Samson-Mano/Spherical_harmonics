@@ -18,8 +18,8 @@ void dynamic_point_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	dyn_point_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_dynvert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/mesh_dynfrag_shader.frag").c_str());
+	dyn_point_shader.create_shader((shadersPath.string() + "/resources/shaders/ln_dynvert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/ln_dynfrag_shader.frag").c_str());
 
 	// Delete all the points
 	clear_points();

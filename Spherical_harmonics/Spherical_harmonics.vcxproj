@@ -207,6 +207,10 @@
     <None Include="resources\shaders\dynpoint_vert_shader.vert" />
     <None Include="resources\shaders\dyntripoint_frag_shader.frag" />
     <None Include="resources\shaders\dyntripoint_vert_shader.vert" />
+    <None Include="resources\shaders\ln_dynfrag_shader.frag" />
+    <None Include="resources\shaders\ln_dynvert_shader.vert" />
+    <None Include="resources\shaders\ln_frag_shader.frag" />
+    <None Include="resources\shaders\ln_vert_shader.vert" />
     <None Include="resources\shaders\load_frag_shader.frag" />
     <None Include="resources\shaders\load_vert_shader.vert" />
     <None Include="resources\shaders\mesh_dynfrag_shader.frag" />

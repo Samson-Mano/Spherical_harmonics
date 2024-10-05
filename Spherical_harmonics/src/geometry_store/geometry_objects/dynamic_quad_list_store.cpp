@@ -137,13 +137,16 @@ void dynamic_quad_list_store::set_buffer()
 
 	VertexBufferLayout quad_pt_layout;
 	quad_pt_layout.AddFloat(3);  // Node center
-	quad_pt_layout.AddFloat(3);  // Node normal
 	quad_pt_layout.AddFloat(3);  // Node offset
+	quad_pt_layout.AddFloat(3);  // Other pt1 center
+	quad_pt_layout.AddFloat(3);  // Other pt1 offset
+	quad_pt_layout.AddFloat(3);  // Other pt2 center
+	quad_pt_layout.AddFloat(3);  // Other pt2 offset
 	quad_pt_layout.AddFloat(1);  // Defl
 
 
-	// Define the node vertices of the model for a node (3 position, 3 face normal, 3 defl, 1 defl mag ) 
-	const unsigned int quad_vertex_count = 10 * 4 * dyn_quad_count;
+	// Define the node vertices of the model for a node (3 x (3 position, 3 defl) 1 defl mag) 18 + 1
+	const unsigned int quad_vertex_count = 19 * 4 * dyn_quad_count;
 	unsigned int quad_vertex_size = quad_vertex_count * sizeof(float); // Size of the node_vertex
 
 	// Create the Node Deflection buffers
@@ -170,8 +173,8 @@ void dynamic_quad_list_store::paint_quadrilaterals()
 
 void dynamic_quad_list_store::update_buffer(const int& dyn_index)
 {
-	// Define the node vertices of the model for a node (3 position, 3 face normal, 3 defl, 1 defl mag) 
-	const unsigned int quad_vertex_count = 10 * 4 * dyn_quad_count;
+	// Define the node vertices of the model for a node (3 x (3 position, 3 defl) 1 defl mag) 18 + 1
+	const unsigned int quad_vertex_count = 19 * 4 * dyn_quad_count;
 	float* quad_vertices = new float[quad_vertex_count];
 
 	unsigned int quad_v_index = 0;
@@ -209,40 +212,30 @@ void dynamic_quad_list_store::clear_quadrilaterals()
 	dyn_quadMap.clear();
 }
 
-void dynamic_quad_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation,
-	bool set_rotatetranslation, bool set_zoomtranslation, bool set_transparency, bool set_deflscale)
+void dynamic_quad_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_deflscale)
 {
 	if (set_modelmatrix == true)
 	{
-		// set the model matrix
+		// set the geom scale
 		dyn_quad_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		dyn_quad_shader.setUniform("transparency", 0.7f);
 
+		// set the projection matrix
+		dyn_quad_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
+		// set the model matrix
 		dyn_quad_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
-	if (set_pantranslation == true)
+
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		dyn_quad_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-	}
-
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		dyn_quad_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		dyn_quad_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
-
-	if (set_transparency == true)
-	{
-		// set the alpha transparency
-		// dyn_quad_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		dyn_quad_shader.setUniform("viewMatrix", viewMatrix, false);
 	}
 
 	if (set_deflscale == true)
@@ -265,89 +258,159 @@ void dynamic_quad_list_store::get_quad_vertex_buffer(dynamic_quad_store* quad, c
 	dyn_quad_vertices[dyn_quad_v_index + 1] = quad->tri123->edge1->start_pt->point_loc.y;
 	dyn_quad_vertices[dyn_quad_v_index + 2] = quad->tri123->edge1->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->face_normal.x;
-	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->face_normal.y;
-	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->face_normal.z;
+	// Point maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->tri123->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->tri123->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->tri123->edge1->start_pt->point_offset[dyn_index].z;
 
-	// Point offset
-	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri123->edge1->start_pt->point_offset[dyn_index].x;
-	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri123->edge1->start_pt->point_offset[dyn_index].y;
-	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri123->edge1->start_pt->point_offset[dyn_index].z;
+	// Other Point 1 location
+	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri123->edge2->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri123->edge2->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri123->edge2->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri123->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 10] = quad->tri123->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 11] = quad->tri123->edge2->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_quad_vertices[dyn_quad_v_index + 12] = quad->tri123->edge3->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 13] = quad->tri123->edge3->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 14] = quad->tri123->edge3->start_pt->point_loc.z;
+
+	// Other Point 2 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 15] = quad->tri123->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 16] = quad->tri123->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 17] = quad->tri123->edge3->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri123->edge1->start_pt->point_offset_mag[dyn_index];
+	dyn_quad_vertices[dyn_quad_v_index + 18] = quad->tri123->edge1->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_quad_v_index = dyn_quad_v_index + 10;
+	dyn_quad_v_index = dyn_quad_v_index + 19;
 
+
+	//_______________________________________________________________________________________________________
 	// Quad Point 2
 	// Point location
 	dyn_quad_vertices[dyn_quad_v_index + 0] = quad->tri123->edge2->start_pt->point_loc.x;
 	dyn_quad_vertices[dyn_quad_v_index + 1] = quad->tri123->edge2->start_pt->point_loc.y;
 	dyn_quad_vertices[dyn_quad_v_index + 2] = quad->tri123->edge2->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->face_normal.x;
-	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->face_normal.y;
-	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->face_normal.z;
-
 	// Point offset
-	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri123->edge2->start_pt->point_offset[dyn_index].x;
-	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri123->edge2->start_pt->point_offset[dyn_index].y;
-	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri123->edge2->start_pt->point_offset[dyn_index].z;
+	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->tri123->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->tri123->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->tri123->edge2->start_pt->point_offset[dyn_index].z;
+
+
+	// Other Point 1 location
+	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri123->edge3->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri123->edge3->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri123->edge3->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri123->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 10] = quad->tri123->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 11] = quad->tri123->edge3->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_quad_vertices[dyn_quad_v_index + 12] = quad->tri123->edge1->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 13] = quad->tri123->edge1->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 14] = quad->tri123->edge1->start_pt->point_loc.z;
+
+	// Other Point 2 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 15] = quad->tri123->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 16] = quad->tri123->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 17] = quad->tri123->edge1->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri123->edge2->start_pt->point_offset_mag[dyn_index];
+	dyn_quad_vertices[dyn_quad_v_index + 18] = quad->tri123->edge2->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_quad_v_index = dyn_quad_v_index + 10;
+	dyn_quad_v_index = dyn_quad_v_index + 19;
 
 
+	//_______________________________________________________________________________________________________
 	// Quad Point 3
 	// Point location
 	dyn_quad_vertices[dyn_quad_v_index + 0] = quad->tri341->edge1->start_pt->point_loc.x;
 	dyn_quad_vertices[dyn_quad_v_index + 1] = quad->tri341->edge1->start_pt->point_loc.y;
 	dyn_quad_vertices[dyn_quad_v_index + 2] = quad->tri341->edge1->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->face_normal.x;
-	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->face_normal.y;
-	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->face_normal.z;
-
 	// Point offset
-	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri341->edge1->start_pt->point_offset[dyn_index].x;
-	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri341->edge1->start_pt->point_offset[dyn_index].y;
-	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri341->edge1->start_pt->point_offset[dyn_index].z;
+	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->tri341->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->tri341->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->tri341->edge1->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 1 location
+	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri341->edge2->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri341->edge2->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri341->edge2->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri341->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 10] = quad->tri341->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 11] = quad->tri341->edge2->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_quad_vertices[dyn_quad_v_index + 12] = quad->tri341->edge3->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 13] = quad->tri341->edge3->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 14] = quad->tri341->edge3->start_pt->point_loc.z;
+
+	// Other Point 2 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 15] = quad->tri341->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 16] = quad->tri341->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 17] = quad->tri341->edge3->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri341->edge1->start_pt->point_offset_mag[dyn_index];
+	dyn_quad_vertices[dyn_quad_v_index + 18] = quad->tri341->edge1->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_quad_v_index = dyn_quad_v_index + 10;
+	dyn_quad_v_index = dyn_quad_v_index + 19;
 
 
+	//_______________________________________________________________________________________________________
 	// Quad Point 4
 	// Point location
 	dyn_quad_vertices[dyn_quad_v_index + 0] = quad->tri341->edge2->start_pt->point_loc.x;
 	dyn_quad_vertices[dyn_quad_v_index + 1] = quad->tri341->edge2->start_pt->point_loc.y;
 	dyn_quad_vertices[dyn_quad_v_index + 2] = quad->tri341->edge2->start_pt->point_loc.z;
 
-	// Point normal
-	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->face_normal.x;
-	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->face_normal.y;
-	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->face_normal.z;
-
 	// Point offset
-	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri341->edge2->start_pt->point_offset[dyn_index].x;
-	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri341->edge2->start_pt->point_offset[dyn_index].y;
-	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri341->edge2->start_pt->point_offset[dyn_index].z;
+	dyn_quad_vertices[dyn_quad_v_index + 3] = quad->tri341->edge2->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 4] = quad->tri341->edge2->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 5] = quad->tri341->edge2->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 1 location
+	dyn_quad_vertices[dyn_quad_v_index + 6] = quad->tri341->edge3->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 7] = quad->tri341->edge3->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 8] = quad->tri341->edge3->start_pt->point_loc.z;
+
+	// Other Point 1 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri341->edge3->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 10] = quad->tri341->edge3->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 11] = quad->tri341->edge3->start_pt->point_offset[dyn_index].z;
+
+	// Other Point 2 location
+	dyn_quad_vertices[dyn_quad_v_index + 12] = quad->tri341->edge1->start_pt->point_loc.x;
+	dyn_quad_vertices[dyn_quad_v_index + 13] = quad->tri341->edge1->start_pt->point_loc.y;
+	dyn_quad_vertices[dyn_quad_v_index + 14] = quad->tri341->edge1->start_pt->point_loc.z;
+
+	// Other Point 2 maximum deflection
+	dyn_quad_vertices[dyn_quad_v_index + 15] = quad->tri341->edge1->start_pt->point_offset[dyn_index].x;
+	dyn_quad_vertices[dyn_quad_v_index + 16] = quad->tri341->edge1->start_pt->point_offset[dyn_index].y;
+	dyn_quad_vertices[dyn_quad_v_index + 17] = quad->tri341->edge1->start_pt->point_offset[dyn_index].z;
+
 
 	// Normalized deflection value
-	dyn_quad_vertices[dyn_quad_v_index + 9] = quad->tri341->edge2->start_pt->point_offset_mag[dyn_index];
+	dyn_quad_vertices[dyn_quad_v_index + 18] = quad->tri341->edge2->start_pt->point_offset_mag[dyn_index];
 
 	// Iterate
-	dyn_quad_v_index = dyn_quad_v_index + 10;
+	dyn_quad_v_index = dyn_quad_v_index + 19;
+
 }
 
 void dynamic_quad_list_store::get_quad_index_buffer(unsigned int* dyn_quad_vertex_indices, unsigned int& dyn_quad_i_index)

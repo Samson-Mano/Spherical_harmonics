@@ -18,8 +18,8 @@ void line_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	line_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
+	line_shader.create_shader((shadersPath.string() + "/resources/shaders/ln_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/ln_frag_shader.frag").c_str());
 
 	line_shader.setUniform("ptColor", geom_param_ptr->geom_colors.edge_color);
 

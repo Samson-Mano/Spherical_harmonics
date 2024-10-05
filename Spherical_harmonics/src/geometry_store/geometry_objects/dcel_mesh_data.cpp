@@ -443,7 +443,10 @@ void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantr
 	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	element_tris.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	element_quads.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
+	
+	bool set_viewmatrix = set_pantranslation || set_rotatetranslation || set_zoomtranslation;
+	
+	element_tris.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
+	element_quads.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
 
 }
