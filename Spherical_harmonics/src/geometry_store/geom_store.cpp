@@ -412,7 +412,7 @@ void geom_store::update_model_matrix()
 	geom_param.modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(static_cast<float>(geom_param.geom_scale)));
 
 	// Update the model matrix
-	mesh_data.update_opengl_uniforms(true, false, false, false, true);
+	mesh_data.update_opengl_uniforms(true, false, true);
 
 	//___________________
 	node_loads.update_geometry_matrices(true, false, false, false, true, false);
@@ -440,7 +440,7 @@ void geom_store::update_model_zoomfit()
 	geom_param.zoom_scale = 1.0f;
 
 	// Update the zoom scale and pan translation
-	mesh_data.update_opengl_uniforms(false, true, true, true, false);
+	mesh_data.update_opengl_uniforms(false, true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, true, true, true, false, false);
@@ -465,7 +465,7 @@ void geom_store::update_model_pan(glm::vec2& transl)
 	geom_param.panTranslation[1][3] = transl.y;
 
 	// Update the pan translation
-	mesh_data.update_opengl_uniforms(false, true, false, false, false);
+	mesh_data.update_opengl_uniforms(false, true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, true, false, false, false, false);
@@ -487,7 +487,7 @@ void geom_store::update_model_rotate(glm::mat4& rotation_m)
 	geom_param.rotateTranslation = rotation_m;
 
 	// Update the rotate translation
-	mesh_data.update_opengl_uniforms(false, false, true, false, false);
+	mesh_data.update_opengl_uniforms(false,  true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, true, false, false, false);
@@ -510,7 +510,7 @@ void geom_store::update_model_zoom(double& z_scale)
 	geom_param.zoom_scale = z_scale;
 
 	// Update the Zoom
-	mesh_data.update_opengl_uniforms(false, false, false, true, false);
+	mesh_data.update_opengl_uniforms(false, true, false);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, true, false, false);
@@ -540,7 +540,7 @@ void geom_store::update_model_transperency(bool is_transparent)
 	}
 
 	// Update the model transparency
-	mesh_data.update_opengl_uniforms(false, false, false, false, true);
+	mesh_data.update_opengl_uniforms(false, false, true);
 
 	//___________________
 	node_loads.update_geometry_matrices(false, false, false, false, true, false);
@@ -632,27 +632,6 @@ void geom_store::paint_model()
 		}
 	}
 
-	//______________________________________________
-	// Paint the model
-	if (op_window->is_show_modelelements == true)
-	{
-		// Show the model elements
-		mesh_data.paint_triangles();
-		mesh_data.paint_quadrilaterals();
-	}
-
-	if (op_window->is_show_modeledeges == true)
-	{
-		// Show the model edges
-		mesh_data.paint_mesh_edges();
-	}
-
-	if (op_window->is_show_meshnormals == true)
-	{
-		// Show the mesh normals
-		mesh_data.paint_mesh_normals();
-	}
-
 	if (op_window->is_show_inlcondition == true)
 	{
 		// Show the node initial condition
@@ -668,12 +647,6 @@ void geom_store::paint_model()
 
 		glPointSize(geom_param.point_size);
 		glLineWidth(geom_param.line_width);
-	}
-
-	if (op_window->is_show_modelnodes == true)
-	{
-		// Show the model nodes
-		// mesh_data.paint_points();
 	}
 
 	if (op_window->is_show_loads == true)
@@ -698,6 +671,38 @@ void geom_store::paint_model()
 		// Node load window is open
 		paint_node_load_operation();
 	}
+
+
+	if (op_window->is_show_modelnodes == true)
+	{
+		// Show the model nodes
+		mesh_data.paint_points();
+	}
+
+	// Paint the wiremesh
+	if (op_window->is_show_modeledeges == true)
+	{
+		// Show the model edges
+		mesh_data.paint_mesh_edges();
+	}
+
+	if (op_window->is_show_meshnormals == true)
+	{
+		// Show the mesh normals
+		mesh_data.paint_mesh_normals();
+	}
+
+
+	//______________________________________________
+// Paint the model
+	if (op_window->is_show_modelelements == true)
+	{
+		// Show the model elements
+		mesh_data.paint_triangles();
+		mesh_data.paint_quadrilaterals();
+	}
+
+
 
 }
 

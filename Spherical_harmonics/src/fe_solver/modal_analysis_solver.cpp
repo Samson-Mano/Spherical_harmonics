@@ -233,6 +233,7 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 				// Add to the string list
 				mode_result_str.push_back("Mode " + std::to_string(this->number_of_modes) + " = " + ss.str() + " Hz (l ="
 					+ std::to_string(l_param) + ", m =" + std::to_string(m_param) + ")");
+
 			}
 
 			// Calculate percentage progress
@@ -246,12 +247,23 @@ void modal_analysis_solver::modal_analysis_start(const nodes_list_store& model_n
 				last_printed_progress = (progress_percentage / 10);
 			}
 
+			if (this->number_of_modes >= paint_mode_count)
+			{
+				// Exit both the for loops
+				break;
+			}
 
 			if (this->number_of_modes >= this->matrix_size)
 			{
 				// Exit both the for loops
 				break;
 			}
+		}
+
+		if (this->number_of_modes >= paint_mode_count)
+		{
+			// Exit both the for loops
+			break;
 		}
 
 		if (this->number_of_modes >= this->matrix_size)

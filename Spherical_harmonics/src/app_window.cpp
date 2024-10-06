@@ -33,7 +33,7 @@ void app_window::init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create a window
-	window = glfwCreateWindow(window_width, window_height, "Spherical Harmonics - Pulse Vibration", nullptr, nullptr);
+	window = glfwCreateWindow(window_width, window_height, "Spherical Harmonics", nullptr, nullptr);
 
 	if (!window)
 	{
@@ -147,16 +147,18 @@ void app_window::app_render()
 	imgui_font = io.Fonts->AddFontFromFileTTF("./resources/fonts/FreeSans.ttf", 18);
 
 	// Z Clamping
-	// glEnable(GL_DEPTH_CLAMP);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
+	
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_LINE_SMOOTH);
 
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST); // Enable depth testing
-	// glDisable(GL_DEPTH_TEST);
-	glFrontFace(GL_CCW);  // Use counter clockwise winding
+	
+
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);  // Use counter clockwise winding
 
 	// Set the point size and line width
 	// Set the point size

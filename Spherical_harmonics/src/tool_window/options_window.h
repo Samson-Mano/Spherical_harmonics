@@ -15,7 +15,7 @@ public:
 	bool is_show_modelnodes = false; // Show model nodes
 
 	// Model elements
-	bool is_show_modeledeges = true; // Show model edges
+	bool is_show_modeledeges = false; // Show model edges
 	bool is_show_modelelements = true; // show model elements
 	bool is_show_meshnormals = false; // show mesh normals
 

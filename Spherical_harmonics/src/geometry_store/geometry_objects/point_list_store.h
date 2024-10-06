@@ -36,8 +36,7 @@ public:
 	void set_buffer();
 	void paint_points();
 	void clear_points();
-	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency);
+	void update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency);
 	void update_point_color(const glm::vec3& pt_color);
 
 private:

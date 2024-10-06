@@ -32,8 +32,8 @@ void geom_parameters::init()
 
 	glm::vec3 mesh_color = glm::vec3(1.0f, 0.54901f, 0.6f); // Lavender   glm::vec3(0.90196f, 0.90196f, 0.98039f)
 
-	geom_colors.point_color = mesh_color; // Light Red glm::vec3(0.8f, 0.2f, 0.2f);
-	geom_colors.edge_color = glm::vec3(1.0f, 0.54901f, 0.6f);  // Dark Orange  glm::vec3(1.0f, 0.54901f, 0.6f);   mesh_color *0.7f
+	geom_colors.point_color = glm::vec3(0.90196f, 0.90196f, 0.98039f); // Light Red glm::vec3(0.8f, 0.2f, 0.2f);
+	geom_colors.edge_color = glm::vec3(0.8f, 0.2f, 0.2f);  // Dark Orange  glm::vec3(1.0f, 0.54901f, 0.6f);   mesh_color *0.7f
 	geom_colors.triangle_color = mesh_color;  // Lavender  
 
 	geom_colors.ptmass_color = glm::vec3(0.2f, 0.7f, 0.2f); // Green

@@ -20,7 +20,7 @@ void options_window::init()
 	is_show_modelnodes = false; // Show model nodes
 
 	// Model elements
-	is_show_modeledeges = true; // Show model edges
+	is_show_modeledeges = false; // Show model edges
 	is_show_modelelements = true; // Show model elements
 	is_show_meshnormals = false; // Show mesh normals
 

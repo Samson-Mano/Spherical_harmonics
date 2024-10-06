@@ -132,7 +132,7 @@ void modal_analysis_window::render_window()
 
 	ImGui::Text("Deformation Scale");
 	ImGui::SameLine();
-	ImGui::SliderFloat(".", &deformation_scale_flt, 0.0f, 100.0f, "%.3f");
+	ImGui::SliderFloat(".", &deformation_scale_flt, 0.0f, 1000.0f, "%.3f");
 	deformation_scale_max = deformation_scale_flt;
 
 	//Set the deformation scale

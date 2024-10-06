@@ -18,10 +18,10 @@ void line_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	line_shader.create_shader((shadersPath.string() + "/resources/shaders/ln_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/ln_frag_shader.frag").c_str());
+	line_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
 
-	line_shader.setUniform("ptColor", geom_param_ptr->geom_colors.edge_color);
+	line_shader.setUniform("vertexColor", geom_param_ptr->geom_colors.edge_color);
 
 	// Delete all the labels
 	clear_lines();
@@ -147,42 +147,37 @@ void line_list_store::clear_lines()
 	lineId_Map.clear();
 }
 
-void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency)
+void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency)
 {
 	if (set_modelmatrix == true)
 	{
-		// set the model matrix
-		// line_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		line_shader.setUniform("transparency", 1.0f);
+		// set the transparency
+		line_shader.setUniform("vertexTransparency", 1.0f);
 
-		// line_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		// line_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// set the projection matrix
+		line_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
+		// set the model matrix
 		line_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
-	if (set_pantranslation == true)
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		line_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
+		line_shader.setUniform("viewMatrix", viewMatrix, false);
+
 	}
 
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		line_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-		if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		line_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
-	}
 
 	if (set_transparency == true)
 	{
 		// set the alpha transparency
-		line_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		line_shader.setUniform("vertexTransparency", static_cast<float>(geom_param_ptr->geom_transparency));
 	}
 }
 
@@ -190,7 +185,7 @@ void line_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pant
 void line_list_store::update_line_color(const glm::vec3& ln_color)
 {
 	// Update the line color
-	line_shader.setUniform("ptColor", ln_color);
+	line_shader.setUniform("vertexColor", ln_color);
 
 }
 

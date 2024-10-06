@@ -18,10 +18,10 @@ void point_list_store::init(geom_parameters* geom_param_ptr)
 	// Create the point shader
 	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;
 
-	point_shader.create_shader((shadersPath.string() + "/resources/shaders/ln_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resources/shaders/ln_frag_shader.frag").c_str());
+	point_shader.create_shader((shadersPath.string() + "/resources/shaders/mesh_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/resources/shaders/mesh_frag_shader.frag").c_str());
 
-	point_shader.setUniform("ptColor", geom_param_ptr->geom_colors.point_color);
+	point_shader.setUniform("vertexColor", geom_param_ptr->geom_colors.point_color);
 
 	// Delete all the labels
 	clear_points();
@@ -109,49 +109,43 @@ void point_list_store::clear_points()
 	pointMap.clear();
 }
 
-void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency)
+void point_list_store::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency)
 {
 	if (set_modelmatrix == true)
 	{
-		// set the model matrix
-		// point_shader.setUniform("geom_scale", static_cast<float>(geom_param_ptr->geom_scale));
-		point_shader.setUniform("transparency", 1.0f);
+		// set the transparency
+		point_shader.setUniform("vertexTransparency", 1.0f);
 
-		// point_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
-		// point_shader.setUniform("viewMatrix", geom_param_ptr->viewMatrix, false);
+		// set the projection matrix
+		point_shader.setUniform("projectionMatrix", geom_param_ptr->projectionMatrix, false);
+
+		// set the model matrix
 		point_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
-	if (set_pantranslation == true)
+	if (set_viewmatrix == true)
 	{
+		glm::mat4 scalingMatrix = glm::mat4(1.0) * static_cast<float>(geom_param_ptr->zoom_scale);
+		scalingMatrix[3][3] = 1.0f;
+
+		glm::mat4 viewMatrix = glm::transpose(geom_param_ptr->panTranslation) * geom_param_ptr->rotateTranslation * scalingMatrix;
+
 		// set the pan translation
-		point_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
-	}
+		point_shader.setUniform("viewMatrix", viewMatrix, false);
 
-	if (set_rotatetranslation == true)
-	{
-		// set the rotate translation
-		point_shader.setUniform("rotateTranslation", geom_param_ptr->rotateTranslation, false);
-	}
-
-	if (set_zoomtranslation == true)
-	{
-		// set the zoom translation
-		point_shader.setUniform("zoomscale", static_cast<float>(geom_param_ptr->zoom_scale));
 	}
 
 	if (set_transparency == true)
 	{
 		// set the alpha transparency
-		point_shader.setUniform("transparency", static_cast<float>(geom_param_ptr->geom_transparency));
+		point_shader.setUniform("vertexTransparency", static_cast<float>(geom_param_ptr->geom_transparency));
 	}
 }
 
 void point_list_store::update_point_color(const glm::vec3& pt_color)
 {
 	// Update the point color
-	point_shader.setUniform("ptColor", pt_color);
+	point_shader.setUniform("vertexColor", pt_color);
 
 }
 

@@ -52,8 +52,7 @@ public:
 	void paint_triangles();
 	void paint_quadrilaterals();
 
-	void update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-		bool set_zoomtranslation, bool set_transparency);
+	void update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency);
 
 private:
 	int half_edge_count = 0;

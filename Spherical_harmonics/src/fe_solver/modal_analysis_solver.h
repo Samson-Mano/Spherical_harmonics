@@ -79,7 +79,7 @@ class modal_analysis_solver
 public:
 	// Result store
 	std::unordered_map<int, int> nodeid_map; // Node ID map for eigen vectors
-	int paint_mode_count = 100; // Draw only first 100 modes (To save memory)
+	int paint_mode_count = 300; // Draw only first 100 modes (To save memory)
 	int number_of_modes = 0;
 	int node_count = 0;
 	int matrix_size = 0;

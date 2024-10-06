@@ -435,16 +435,17 @@ void dcel_mesh_data::paint_quadrilaterals()
 }
 
 
-void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_pantranslation, bool set_rotatetranslation,
-	bool set_zoomtranslation, bool set_transparency)
+void dcel_mesh_data::update_opengl_uniforms(bool set_modelmatrix, bool set_viewmatrix, bool set_transparency)
 {
-	// Update the openGL uniform values of geometry
-	node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
-	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_pantranslation, set_rotatetranslation, set_zoomtranslation, set_transparency);
 	
-	bool set_viewmatrix = set_pantranslation || set_rotatetranslation || set_zoomtranslation;
+	// bool set_viewmatrix = set_pantranslation || set_rotatetranslation || set_zoomtranslation;
+	
+	// Update the openGL uniform values of geometry
+	node_points.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
+	selected_node_points.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
+
+	mesh_normals.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
+	mesh_boundaries.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
 	
 	element_tris.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);
 	element_quads.update_opengl_uniforms(set_modelmatrix, set_viewmatrix, set_transparency);

@@ -82,7 +82,7 @@ public:
 	// Geometry size
 	const float point_size = 2.4f;
 	const float selected_point_size = 4.4f;
-	const float line_width = 1.1f;
+	const float line_width = 1.6f;
 	const float selected_line_width = 2.1f;
 	
 	// Precision for various values
