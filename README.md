@@ -83,19 +83,18 @@ This project is open for contributions, and there are several areas where improv
 ### How to Contribute:
 - Fork the repository and submit a pull request.
 - Open an [issue](https://github.com/Samson-Mano/Spherical_harmonics/issues) to report bugs or suggest features.
-- Review the [CONTRIBUTING.md](link_to_contributing) file for more details.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**. See the [LICENSE](link_to_license) file for more details.
+This project is licensed under the **MIT License**. See the [LICENSE](/LICENSE.txt) file for more details.
 
 ---
 
 ## Acknowledgments
 
-Thank you for using the **Spherical Harmonics** project! We hope this tool helps you explore and understand spherical harmonic mode shapes and their applications.
+Thank you for using the **Spherical Harmonics** project! Hope this tool helps you explore and understand spherical harmonic mode shapes and their applications.
 
 ## Screenshots
 
